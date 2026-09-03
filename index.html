@@ -1,0 +1,245 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A11y Remediation Engine — Detect → Fix → Verify</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500/30">
+
+  <!-- TOP HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/70 backdrop-blur-md sticky top-0 z-50 px-6 py-3.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand & Pitch Hook -->
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-500/20 text-white font-black text-lg">
+          A
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base tracking-tight text-white">A11y Remediation Engine</h1>
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-semibold">
+              WCAG 2.1 AA
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">The Layer Between Detecting Problems and Fixing Them</p>
+        </div>
+      </div>
+
+      <!-- Pipeline Step Indicators -->
+      <div class="flex items-center gap-2">
+        <div id="step-indicator-1" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400">
+          <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+          <span>1. Detect</span>
+        </div>
+        <span class="text-slate-600 text-xs">→</span>
+        <div id="step-indicator-2" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400">
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+          <span>2. Fix (Hybrid)</span>
+        </div>
+        <span class="text-slate-600 text-xs">→</span>
+        <div id="step-indicator-3" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>3. Verify</span>
+        </div>
+      </div>
+
+      <!-- Action Primary Buttons -->
+      <div class="flex items-center gap-2">
+        <button id="stepModeBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all shadow-sm">
+          <span>🎬</span>
+          <span>Step-by-Step Pitch</span>
+        </button>
+        <button id="runPipelineBtn" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-md shadow-indigo-600/30">
+          <span>⚡</span>
+          <span>Run Pipeline</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- SUBHEADER: PRESETS & CONTEXT -->
+  <div class="border-b border-slate-800/80 bg-slate-900/40 px-6 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Demo Presets:</span>
+        <div id="presetButtons" class="flex items-center gap-1.5"></div>
+      </div>
+      <div id="presetDescription" class="text-xs text-slate-400 italic"></div>
+    </div>
+  </div>
+
+  <!-- MAIN 3-STAGE WORKSPACE -->
+  <main class="flex-1 max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- COLUMN 1: STAGE 1 — DETECT (4 cols) -->
+    <section class="lg:col-span-4 flex flex-col gap-4">
+      <div class="flex items-center justify-between pb-1 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+          <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Stage 1: Detect</h2>
+        </div>
+        <span id="detectCountBadge" class="text-xs px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700">0</span>
+      </div>
+
+      <!-- Code Input Area -->
+      <div class="flex flex-col bg-slate-900/90 rounded-xl border border-slate-800 overflow-hidden shadow-sm">
+        <div class="px-3 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
+          <span>source-input.html</span>
+          <span class="text-[10px] text-slate-500">Editable Snippet</span>
+        </div>
+        <textarea id="htmlEditor" rows="8" spellcheck="false" class="w-full bg-slate-950 p-3.5 font-mono text-xs text-slate-200 leading-relaxed focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y border-none" placeholder="Paste HTML code to analyze..."></textarea>
+      </div>
+
+      <!-- Detected Violations List -->
+      <div class="flex-1 flex flex-col bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
+        <div class="px-3.5 py-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-300">axe-core Scanner Diagnostics</span>
+          <span class="text-[10px] text-slate-500">Classification Engine</span>
+        </div>
+        <div id="violationsList" class="p-3.5 flex-1 overflow-y-auto max-h-[380px]">
+          <div class="text-xs text-slate-500 italic p-4 text-center">Click "Run Pipeline" to detect accessibility violations.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLUMN 2: STAGE 2 — FIX (HYBRID ENGINE) (4 cols) -->
+    <section class="lg:col-span-4 flex flex-col gap-4">
+      <div class="flex items-center justify-between pb-1 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+          <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Stage 2: Hybrid Remediation</h2>
+        </div>
+        <span id="remediateCountBadge" class="text-xs px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700">0</span>
+      </div>
+
+      <!-- Hybrid Engine Philosophy Card -->
+      <div class="p-3 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/40 border border-indigo-900/40">
+        <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-300 mb-1">
+          <span>⚙️ Deterministic vs. 🧠 AI Philosophy</span>
+        </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          <strong>Deterministic Math/Rules:</strong> Heading order & contrast formulas.<br>
+          <strong>Contextual AI / LLM:</strong> Missing alt text semantic reasoning.
+        </p>
+      </div>
+
+      <!-- Generated Fixes List -->
+      <div class="flex-1 flex flex-col bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
+        <div class="px-3.5 py-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-300">AST Transformations & Reasoning</span>
+          <span class="text-[10px] text-slate-500">Source Patches</span>
+        </div>
+        <div id="remediationList" class="p-3.5 flex-1 overflow-y-auto max-h-[460px]">
+          <div class="text-xs text-slate-500 italic p-4 text-center">Remediation steps will appear here.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLUMN 3: STAGE 3 — VERIFY & OUTPUT (4 cols) -->
+    <section class="lg:col-span-4 flex flex-col gap-4">
+      <div class="flex items-center justify-between pb-1 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Stage 3: Verification Loop</h2>
+        </div>
+        <span id="verifyCountBadge" class="text-xs px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700">0</span>
+      </div>
+
+      <!-- Verification Results Container -->
+      <div id="verificationList">
+        <div class="text-xs text-slate-500 italic p-4 text-center bg-slate-900/60 rounded-xl border border-slate-800">
+          Verification status will appear here.
+        </div>
+      </div>
+
+      <!-- Output Tabs: Diff, Code, Preview -->
+      <div class="flex-1 flex flex-col bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
+        
+        <!-- Tab Navigation -->
+        <div class="flex items-center justify-between px-3 bg-slate-900/90 border-b border-slate-800">
+          <div class="flex items-center gap-1">
+            <button id="tab-diff" class="active-tab px-3 py-2 text-xs font-semibold border-b-2 border-indigo-500 text-indigo-400 transition-colors">
+              Code Diff
+            </button>
+            <button id="tab-code" class="px-3 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors">
+              Clean HTML
+            </button>
+            <button id="tab-preview" class="px-3 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors">
+              Live Preview
+            </button>
+          </div>
+          <div class="flex items-center gap-1">
+            <button id="copyCodeBtn" title="Copy remediated code" class="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors text-xs flex items-center gap-1">
+              <span>📋 Copy</span>
+            </button>
+            <button id="downloadHtmlBtn" title="Download HTML file" class="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors text-xs flex items-center gap-1">
+              <span>💾 Save</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 1: Diff View -->
+        <div id="view-diff" class="p-3.5 flex-1 overflow-y-auto max-h-[300px]">
+          <div id="diffView" class="text-xs text-slate-500 italic p-4 text-center">Run pipeline to inspect line-by-line diff.</div>
+        </div>
+
+        <!-- Tab 2: Clean Code View -->
+        <div id="view-code" class="hidden p-3.5 flex-1 overflow-y-auto max-h-[300px]">
+          <pre id="remediatedCode" class="font-mono text-xs text-emerald-300 whitespace-pre-wrap leading-relaxed bg-slate-950 p-3 rounded-lg border border-slate-800"></pre>
+        </div>
+
+        <!-- Tab 3: Rendered Live Preview -->
+        <div id="view-preview" class="hidden p-2 flex-1 overflow-hidden h-[300px]">
+          <iframe id="renderedPreview" class="w-full h-full rounded-lg bg-white border border-slate-700"></iframe>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-900/50 py-3 px-6 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <span>Automated Accessibility Remediation Prototype</span> &bull; 
+        <span class="text-slate-400">Detect &rarr; Fix &rarr; Verify</span>
+      </div>
+      <div class="text-slate-400 font-mono text-[11px]">
+        Built for Hackathon Live Demo & Stage Presentation
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="engine/detector.js"></script>
+  <script src="engine/remediator.js"></script>
+  <script src="engine/verifier.js"></script>
+  <script src="engine/diff.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

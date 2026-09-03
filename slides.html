@@ -1,0 +1,304 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hackathon Pitch — Detect → Fix → Verify</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .slide { display: none; }
+    .slide.active { display: flex; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between select-none overflow-hidden">
+
+  <!-- TOP BAR -->
+  <header class="px-8 py-4 border-b border-slate-800 flex justify-between items-center text-xs text-slate-400">
+    <div class="flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+      <span class="font-bold uppercase tracking-wider text-slate-200">Automated Accessibility Remediation</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span id="slideCounter" class="font-mono font-semibold text-slate-300">Slide 1 / 9</span>
+      <a href="http://localhost:3001" target="_blank" class="px-3 py-1 bg-indigo-600/30 text-indigo-300 border border-indigo-500/50 rounded-lg hover:bg-indigo-600/50 transition">
+        Open Live Demo ↗
+      </a>
+    </div>
+  </header>
+
+  <!-- SLIDES CONTAINER -->
+  <main class="flex-1 flex items-center justify-center p-8 max-w-5xl mx-auto w-full">
+
+    <!-- SLIDE 1: OPENING -->
+    <div class="slide active flex-col items-center text-center space-y-6 animate-fadeIn">
+      <span class="text-xs uppercase tracking-widest font-mono text-indigo-400 font-semibold px-3 py-1 bg-indigo-950/60 rounded-full border border-indigo-800">
+        1. Opening — The Problem
+      </span>
+      <h1 class="text-4xl md:text-5xl font-black tracking-tight text-white max-w-3xl leading-tight">
+        What happens when a developer knows a website has accessibility problems?
+      </h1>
+      <p class="text-lg text-slate-400 max-w-2xl leading-relaxed">
+        Today's tools tell you <strong class="text-rose-400">what is wrong</strong>.<br>
+        Missing alt text. Missing form labels. Low contrast. Broken hierarchy.
+      </p>
+      <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl text-base text-slate-300 max-w-xl">
+        <strong class="text-amber-300">The Gap:</strong> The tool points at the error, but the developer is left to manually research, write, and test every single fix.
+      </div>
+    </div>
+
+    <!-- SLIDE 2: OUR IDEA -->
+    <div class="slide flex-col items-center text-center space-y-6">
+      <span class="text-xs uppercase tracking-widest font-mono text-indigo-400 font-semibold px-3 py-1 bg-indigo-950/60 rounded-full border border-indigo-800">
+        2. Our Idea
+      </span>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-white">
+        Automated Accessibility Remediation
+      </h2>
+      <div class="flex items-center gap-4 py-4 text-xl md:text-2xl font-bold font-mono">
+        <span class="px-4 py-2 rounded-xl bg-rose-950/60 text-rose-300 border border-rose-800">Detect</span>
+        <span class="text-slate-600">&rarr;</span>
+        <span class="px-4 py-2 rounded-xl bg-blue-950/60 text-blue-300 border border-blue-800">Fix</span>
+        <span class="text-slate-600">&rarr;</span>
+        <span class="px-4 py-2 rounded-xl bg-emerald-950/60 text-emerald-300 border border-emerald-800">Verify</span>
+      </div>
+      <p class="text-lg text-slate-300 max-w-2xl">
+        We're not building just another accessibility scanner.<br>
+        <strong class="text-white">We're building the layer between detecting a problem and actually fixing it.</strong>
+      </p>
+    </div>
+
+    <!-- SLIDE 3: HOW IT WORKS -->
+    <div class="slide flex-col items-center text-center space-y-6">
+      <span class="text-xs uppercase tracking-widest font-mono text-indigo-400 font-semibold px-3 py-1 bg-indigo-950/60 rounded-full border border-indigo-800">
+        3. How It Works — Hybrid Approach
+      </span>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-white">
+        Algorithms for Deterministic Logic.<br>AI for Contextual Interpretation.
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full text-left pt-2">
+        <div class="p-5 bg-slate-900 border border-slate-800 rounded-2xl">
+          <div class="flex items-center gap-2 text-blue-400 font-bold mb-2">
+            <span>⚙️</span>
+            <span>Deterministic Formulas</span>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Don't use an LLM where math or AST rules give 100% precision:</p>
+          <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+            <li><strong>Color Contrast:</strong> Relative luminance math ($4.5:1$).</li>
+            <li><strong>Heading Hierarchy:</strong> Sequential outline tree rebalance.</li>
+            <li><strong>Form Labels:</strong> Synthesizing explicit &lt;label for="..."&gt;.</li>
+          </ul>
+        </div>
+        <div class="p-5 bg-slate-900 border border-slate-800 rounded-2xl">
+          <div class="flex items-center gap-2 text-purple-400 font-bold mb-2">
+            <span>🧠</span>
+            <span>AI / LLM Interpretation</span>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Where semantic context and human perception are required:</p>
+          <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+            <li><strong>Image Alt Text:</strong> Inferred from page hierarchy, filename semantics, and surrounding text.</li>
+            <li><strong>Contextual Description:</strong> Understands that "shoe.jpg" under "Shoes" means "Red running shoe".</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: VERIFICATION LOOP -->
+    <div class="slide flex-col items-center text-center space-y-6">
+      <span class="text-xs uppercase tracking-widest font-mono text-indigo-400 font-semibold px-3 py-1 bg-indigo-950/60 rounded-full border border-indigo-800">
+        4. The Most Important Part
+      </span>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-white">
+        The Verification Loop
+      </h2>
+      <p class="text-base text-slate-300 max-w-2xl">
+        What if the AI makes a mistake? <strong class="text-white">We do not blindly trust the AI.</strong><br>
+        We re-scan the modified source code with our detection engine:
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+        <div class="p-4 bg-emerald-950/30 border border-emerald-500/40 rounded-xl text-center">
+          <div class="text-2xl mb-1">✅</div>
+          <div class="font-bold text-emerald-300">Verified</div>
+          <p class="text-xs text-slate-400 mt-1">Second pass confirms the violation was completely eliminated.</p>
+        </div>
+        <div class="p-4 bg-amber-950/30 border border-amber-500/40 rounded-xl text-center">
+          <div class="text-2xl mb-1">⚠️</div>
+          <div class="font-bold text-amber-300">Needs Review</div>
+          <p class="text-xs text-slate-400 mt-1">Flagged if ambiguity remains or a secondary issue occurs.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: LIVE DEMO -->
+    <div class="slide flex-col items-center text-center space-y-6">
+      <span class="text-xs uppercase tracking-widest font-mono text-indigo-400 font-semibold px-3 py-1 bg-indigo-950/60 rounded-full border border-indigo-800">
+        5. Live Demonstration
+      </span>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-white">
+        Before &rarr; After &rarr; Verification
+      </h2>
+      <div class="p-6 bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full text-left space-y-4">
+        <div class="text-xs font-mono text-slate-400">
+          <span class="text-rose-400 font-bold">&lt;input snippet&gt;</span><br>
+          &lt;h1&gt;Products&lt;/h1&gt;<br>
+          &lt;h4&gt;Shoes&lt;/h4&gt;<br>
+          &lt;img src="shoe.jpg"&gt;<br>
+          &lt;input type="text"&gt;
+        </div>
+        <div class="text-xs font-mono text-slate-400 border-t border-slate-800 pt-3">
+          <span class="text-emerald-400 font-bold">&lt;verified fix&gt;</span><br>
+          &lt;h1&gt;Products&lt;/h1&gt;<br>
+          &lt;h2&gt;Shoes&lt;/h2&gt; <span class="text-blue-400">[Deterministic]</span><br>
+          &lt;img src="shoe.jpg" alt="Red running shoe"&gt; <span class="text-purple-400">[AI/LLM]</span><br>
+          &lt;label for="email"&gt;Email&lt;/label&gt; &lt;input id="email" ...&gt; <span class="text-blue-400">[Deterministic]</span>
+        </div>
+      </div>
+      <a href="http://localhost:3001" target="_blank" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-600/30 transition">
+        Switch to Live Prototype (http://localhost:3001) &rarr;
+      </a>
+    </div>
+
+    <!-- SLIDE 6: WHY THIS MATTERS -->
+    <div class="slide flex-col items-center text-center space-y-6">
+      <span class="text-xs uppercase tracking-widest font-mono text-indigo-400 font-semibold px-3 py-1 bg-indigo-950/60 rounded-full border border-indigo-800">
+        6. Why This Matters
+      </span>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-white">
+        Turning Reports into Actionable Code
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full pt-2 text-left">
+        <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl">
+          <div class="text-indigo-400 font-bold text-sm mb-1">For Developers</div>
+          <p class="text-xs text-slate-400">Eliminates repetitive manual fixes and syntax guesswork.</p>
+        </div>
+        <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl">
+          <div class="text-indigo-400 font-bold text-sm mb-1">For Organizations</div>
+          <p class="text-xs text-slate-400">Accessibility becomes continuous rather than a painful pre-launch audit.</p>
+        </div>
+        <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl">
+          <div class="text-indigo-400 font-bold text-sm mb-1">For Users</div>
+          <p class="text-xs text-slate-400">Actually delivers accessible websites to people with disabilities.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: WHY WE ARE DIFFERENT -->
+    <div class="slide flex-col items-center text-center space-y-6">
+      <span class="text-xs uppercase tracking-widest font-mono text-indigo-400 font-semibold px-3 py-1 bg-indigo-950/60 rounded-full border border-indigo-800">
+        7. Why This Is Different
+      </span>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-white">
+        Detection + Remediation + Verification
+      </h2>
+      <div class="p-5 bg-slate-900/90 border border-slate-800 rounded-2xl max-w-xl text-left font-mono text-xs text-slate-300 space-y-1">
+        <div>Accessibility violation</div>
+        <div class="text-slate-600 pl-4">&darr;</div>
+        <div>Understand problem (Classification)</div>
+        <div class="text-slate-600 pl-4">&darr;</div>
+        <div>Generate code fix (Hybrid Engine)</div>
+        <div class="text-slate-600 pl-4">&darr;</div>
+        <div>Modify source code (AST)</div>
+        <div class="text-slate-600 pl-4">&darr;</div>
+        <div>Run tests again (Verification Scanner)</div>
+        <div class="text-slate-600 pl-4">&darr;</div>
+        <div class="text-emerald-400 font-bold">Verified Result &check;</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: FUTURE VISION -->
+    <div class="slide flex-col items-center text-center space-y-6">
+      <span class="text-xs uppercase tracking-widest font-mono text-indigo-400 font-semibold px-3 py-1 bg-indigo-950/60 rounded-full border border-indigo-800">
+        8. Future Vision
+      </span>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-white">
+        Where We Go From Here
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full pt-2 text-left">
+        <div class="p-5 bg-slate-900 border border-slate-800 rounded-2xl">
+          <div class="text-base mb-1">🔌</div>
+          <div class="font-bold text-slate-200 text-sm mb-1">VS Code Extension</div>
+          <p class="text-xs text-slate-400">One-click "Remediate with Verification" inline inside developer editors.</p>
+        </div>
+        <div class="p-5 bg-slate-900 border border-slate-800 rounded-2xl">
+          <div class="text-base mb-1">🚀</div>
+          <div class="font-bold text-slate-200 text-sm mb-1">CI/CD Pipeline Gate</div>
+          <p class="text-xs text-slate-400">Automated GitHub Action creating verified remediation PRs on commit.</p>
+        </div>
+        <div class="p-5 bg-slate-900 border border-slate-800 rounded-2xl">
+          <div class="text-base mb-1">⚛️</div>
+          <div class="font-bold text-slate-200 text-sm mb-1">Component ASTs</div>
+          <p class="text-xs text-slate-400">Support for React/JSX, Vue templates, and design system tokens.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: CLOSING -->
+    <div class="slide flex-col items-center text-center space-y-6">
+      <span class="text-xs uppercase tracking-widest font-mono text-emerald-400 font-semibold px-3 py-1 bg-emerald-950/60 rounded-full border border-emerald-800">
+        9. Closing
+      </span>
+      <h2 class="text-4xl md:text-5xl font-black text-white">
+        Detect &rarr; Fix &rarr; Verify.
+      </h2>
+      <p class="text-lg text-slate-300 max-w-xl leading-relaxed">
+        Existing tools tell developers: <em>"Something is wrong."</em><br>
+        We answer: <strong>Can we fix it? Did it work? Can we prove it?</strong>
+      </p>
+      <div class="pt-4 text-2xl font-bold text-indigo-400">
+        Thank you.
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM NAVIGATION CONTROLS -->
+  <footer class="px-8 py-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+    <div class="flex items-center gap-3">
+      <span class="hidden sm:inline">Use <kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-[10px] font-mono border border-slate-700">&larr;</kbd> <kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-[10px] font-mono border border-slate-700">&rarr;</kbd> or Spacebar to navigate</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="prevSlide()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">
+        Previous
+      </button>
+      <button onclick="nextSlide()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold">
+        Next &rarr;
+      </button>
+    </div>
+  </footer>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('slideCounter');
+
+    function updateSlides() {
+      slides.forEach((s, i) => {
+        s.classList.toggle('active', i === currentSlide);
+      });
+      counter.textContent = `Slide ${currentSlide + 1} / ${slides.length}`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        updateSlides();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlides();
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+  </script>
+</body>
+</html>
