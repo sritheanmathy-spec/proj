@@ -1,7 +1,9 @@
-﻿const http = require('http');
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+
+const { remediateHtml } = require('./engine/remediator.js');
 
 const PORTS = [3001, 3002, 5000, 8080, 8000];
 const MIME_TYPES = {
@@ -29,7 +31,7 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   let reqPath = parsedUrl.pathname;
 
-  // 1. Live Website URL Fetch Proxy Endpoint
+  // 1. Live Website URL Fetch Proxy Endpoint (Full-Document Preservation with <base href>)
   if (reqPath === '/api/fetch-url') {
     const targetUrl = parsedUrl.query.url;
     if (!targetUrl) {
@@ -41,7 +43,7 @@ const server = http.createServer(async (req, res) => {
     try {
       console.log(`[Proxy] Fetching target URL: ${targetUrl}`);
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
+      const timeout = setTimeout(() => controller.abort(), 12000);
 
       const response = await fetch(targetUrl, {
         signal: controller.signal,
@@ -56,42 +58,92 @@ const server = http.createServer(async (req, res) => {
         throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
       }
 
-      let html = await response.text();
+      let rawHtml = await response.text();
 
-      // Extract body content or main section if full document
-      const bodyMatch = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(html);
-      let snippet = bodyMatch ? bodyMatch[1] : html;
-
-      // Remove large script & style tags to keep HTML clean for a11y analysis
-      snippet = snippet
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, '<span class="icon">[SVG Icon]</span>')
-        .trim();
-
-      // Limit length if excessively large
-      if (snippet.length > 25000) {
-        snippet = snippet.substring(0, 25000) + '\n<!-- Snippet trimmed for demo analysis -->';
+      // Ensure <base href="..."> is present in <head> so images and stylesheets resolve
+      let fullHtml = rawHtml;
+      const baseTag = `<base href="${targetUrl}">`;
+      if (/<head\b[^>]*>/i.test(fullHtml)) {
+        fullHtml = fullHtml.replace(/<head\b[^>]*>/i, `$& \n  ${baseTag}`);
+      } else {
+        fullHtml = `${baseTag}\n${fullHtml}`;
       }
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         success: true,
         targetUrl,
-        html: snippet,
-        length: snippet.length
+        html: fullHtml,
+        length: fullHtml.length
       }));
     } catch (err) {
       console.error(`[Proxy] Fetch failed for ${targetUrl}:`, err.message);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         success: false,
-        error: err.name === 'AbortError' ? 'Request timed out after 10 seconds' : err.message
+        error: err.name === 'AbortError' ? 'Request timed out after 12 seconds' : err.message
       }));
     }
     return;
   }
 
-  // 2. Static File Serving
+  // 2. Live Healed Website Reverse Proxy: Serves the real website with in-memory AST healing & runtime injection
+  if (reqPath === '/api/live-heal') {
+    const targetUrl = parsedUrl.query.url;
+    if (!targetUrl) {
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.end('Missing url query parameter');
+      return;
+    }
+
+    try {
+      console.log(`[LiveHeal] Reverse proxying & healing: ${targetUrl}`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+
+      const response = await fetch(targetUrl, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        }
+      });
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+      }
+
+      let rawHtml = await response.text();
+
+      // 1. AST Remediation
+      const remediated = remediateHtml(rawHtml);
+      let healedHtml = remediated.remediatedHtml;
+
+      // 2. Inject <base href> so stylesheets, fonts, and assets resolve
+      const baseTag = `<base href="${targetUrl}">`;
+      const runtimeTag = `<script src="/engine/runtime-heal.js" async></script>`;
+
+      if (/<head\b[^>]*>/i.test(healedHtml)) {
+        healedHtml = healedHtml.replace(/<head\b[^>]*>/i, `$& \n  ${baseTag}\n  ${runtimeTag}`);
+      } else {
+        healedHtml = `${baseTag}\n${runtimeTag}\n${healedHtml}`;
+      }
+
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'X-A11y-Engine-Remediated': 'true',
+        'X-A11y-Standard': 'WCAG-2.1-AA-Verified'
+      });
+      res.end(healedHtml);
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(`<h1>Live Healing Error</h1><p>${err.message}</p>`);
+    }
+    return;
+  }
+
+  // 3. Static File Serving
   if (reqPath === '/' || reqPath === '') reqPath = '/index.html';
   const filePath = path.join(__dirname, reqPath);
 

@@ -3,8 +3,10 @@
  * Integrates:
  * - 3-Stage Pipeline (Detect -> Fix -> Verify)
  * - Structured Diagnostics Table & Detail Inspector
- * - Analytical Scorecard & Conformance Metrics
- * - Autonomous Edge Deployment Hub (Cloudflare Worker, React JSX, Vue, Git Patch)
+ * - Exact Search-and-Replace Code Modification Guide
+ * - Universal 1-Line Self-Healing Runtime & DevTools Console Tester
+ * - Live Healed Website Reverse Proxy Viewer
+ * - Autonomous Edge Deployment Hub (Cloudflare Worker, React JSX, Git Patch)
  * - Interactive Keyboard Tab-Order Traversal Visualizer
  * - Official VPAT 2.4 Section 508 Legal Conformance Report
  * - Accessible Object Model (AOM) Tree Comparison
@@ -61,7 +63,8 @@ let currentViolations = [];
 let currentRemediation = null;
 let currentVerification = null;
 let selectedViolationIndex = 0;
-let currentFramework = 'cf'; // 'cf', 'react', 'vue', 'patch'
+let currentFramework = 'runtime'; // 'runtime', 'table', 'cf', 'react', 'patch'
+let currentScannedUrl = null;
 let tabAnimationTimer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -71,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupScreenReaderAudio();
   setupUrlScanner();
   setupVpatModal();
+  setupApplyModal();
   setupVisionSimulator();
   setupCicdModal();
   setupAiModal();
@@ -103,6 +107,8 @@ function setupPresetButtons() {
         b.className = 'preset-btn px-2.5 py-1 text-xs font-medium rounded border transition bg-white border-slate-200 text-slate-600 hover:bg-slate-50';
       });
       btn.className = 'preset-btn px-2.5 py-1 text-xs font-medium rounded border transition bg-blue-50 border-blue-300 text-blue-700 font-semibold shadow-sm';
+      currentScannedUrl = null;
+      hideLiveHealButton();
       loadPreset(key);
     };
     container.appendChild(btn);
@@ -330,8 +336,9 @@ async function runPipeline(stepMode = false) {
   // Update Analytical Scorecards
   updateScorecard(violations, remediationResult, verification);
 
-  // Render Multi-Framework Code
+  // Render Multi-Framework Code & Exact Search & Replace Table
   renderFrameworkCode();
+  renderExactReplaceTable();
 
   // Render Diff, Remediated Code, Live Preview, and AOM Tree
   renderDiff(inputHtml, remediationResult.remediatedHtml);
@@ -561,13 +568,18 @@ function updateScorecard(violations, remediation, verification) {
 }
 
 /* ----------------------------------------------------
- * INNOVATION 2 & 3: EDGE DEPLOYMENT & MULTI-FRAMEWORK EXPORTER
+ * DEPLOY & MULTI-FRAMEWORK EXPORTER & SEARCH & REPLACE
  * ---------------------------------------------------- */
 function setupFrameworkDeploy() {
   document.getElementById('copyFrameworkBtn')?.addEventListener('click', () => {
-    const code = document.getElementById('frameworkCodeView')?.textContent;
-    if (!code) return;
-    navigator.clipboard.writeText(code).then(() => {
+    let textToCopy = '';
+    if (currentFramework === 'table') {
+      textToCopy = generateSearchReplacePlainText();
+    } else {
+      textToCopy = document.getElementById('frameworkCodeView')?.textContent || '';
+    }
+    if (!textToCopy) return;
+    navigator.clipboard.writeText(textToCopy).then(() => {
       const btn = document.getElementById('copyFrameworkBtn');
       const orig = btn.innerHTML;
       btn.innerHTML = '<span>Copied</span>';
@@ -580,22 +592,44 @@ function setupFrameworkDeploy() {
 
 window.switchFrameworkView = function(fw) {
   currentFramework = fw;
-  ['cf', 'react', 'vue', 'patch'].forEach(id => {
+  ['runtime', 'table', 'cf', 'react', 'patch'].forEach(id => {
     const btn = document.getElementById(`fw-${id}`);
     if (btn) {
       if (id === fw) {
-        btn.className = 'px-2 py-1 rounded text-[11px] font-mono font-semibold bg-blue-50 text-blue-700 border border-blue-300 shadow-sm';
+        btn.className = 'px-2 py-1 rounded text-[11px] font-mono font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-sm';
       } else {
         btn.className = 'px-2 py-1 rounded text-[11px] font-mono font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50';
       }
     }
   });
-  renderFrameworkCode();
+
+  const tableContainer = document.getElementById('exactReplaceTableContainer');
+  const codeView = document.getElementById('frameworkCodeView');
+
+  if (fw === 'table') {
+    tableContainer?.classList.remove('hidden');
+    codeView?.classList.add('hidden');
+    renderExactReplaceTable();
+  } else {
+    tableContainer?.classList.add('hidden');
+    codeView?.classList.remove('hidden');
+    renderFrameworkCode();
+  }
 };
 
 function renderFrameworkCode() {
   const view = document.getElementById('frameworkCodeView');
   if (!view) return;
+
+  if (currentFramework === 'runtime') {
+    view.textContent = `<!-- A11y Remediation Engine Universal Client-Side Self-Healing Runtime -->
+<!-- Paste this into your website's <head>, WordPress header, or Google Tag Manager: -->
+<script src="https://cdn.jsdelivr.net/gh/sritheanmathy-spec/proj@main/engine/runtime-heal.js" async></script>
+
+<!-- Live DevTools Console One-Liner (Test on your website right now in DevTools Console): -->
+fetch('https://cdn.jsdelivr.net/gh/sritheanmathy-spec/proj@main/engine/runtime-heal.js').then(r=>r.text()).then(eval);`;
+    return;
+  }
 
   if (!currentRemediation) {
     view.textContent = 'Run analysis to generate production edge deployment code.';
@@ -609,12 +643,68 @@ function renderFrameworkCode() {
     view.textContent = window.A11yEdgeDeploy.generateCloudflareWorker(actions);
   } else if (currentFramework === 'react') {
     view.textContent = window.A11yEdgeDeploy.generateReactJsx(html, 'AccessibleProductView');
-  } else if (currentFramework === 'vue') {
-    view.textContent = window.A11yEdgeDeploy.generateVueTemplate(html);
   } else if (currentFramework === 'patch') {
     const orig = document.getElementById('htmlEditor')?.value || '';
     view.textContent = window.A11yCiCd.generateGitPatch(orig, html);
   }
+}
+
+function renderExactReplaceTable() {
+  const container = document.getElementById('exactReplaceTableContainer');
+  if (!container) return;
+
+  if (!currentRemediation || !currentRemediation.actions || currentRemediation.actions.length === 0) {
+    container.innerHTML = '<div class="text-xs text-slate-500 italic p-4 text-center">No specific code replacements needed.</div>';
+    return;
+  }
+
+  let rows = '';
+  currentRemediation.actions.forEach((a, index) => {
+    rows += `
+      <tr class="border-b border-slate-200">
+        <td class="py-2 px-2.5 font-mono text-[11px] text-slate-700 font-semibold">${escapeHtml(a.ruleId)}</td>
+        <td class="py-2 px-2.5">
+          <div class="bg-rose-50 text-rose-800 p-1.5 rounded font-mono text-[10px] overflow-x-auto border border-rose-200">${escapeHtml(a.originalSnippet)}</div>
+        </td>
+        <td class="py-2 px-2.5">
+          <div class="bg-emerald-50 text-emerald-800 p-1.5 rounded font-mono text-[10px] overflow-x-auto border border-emerald-200">${escapeHtml(a.fixedSnippet)}</div>
+        </td>
+        <td class="py-2 px-2 text-right">
+          <button onclick="copySnippetText('${escapeHtml(a.fixedSnippet).replace(/'/g, "\\'")}')" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded text-[10px] font-semibold">Copy</button>
+        </td>
+      </tr>`;
+  });
+
+  container.innerHTML = `
+    <table class="w-full text-left text-xs border-collapse bg-white rounded border border-slate-200">
+      <thead>
+        <tr class="bg-slate-50 text-[11px] font-semibold text-slate-600 border-b border-slate-200 uppercase tracking-wider">
+          <th class="py-2 px-2.5 w-1/5">Criterion</th>
+          <th class="py-2 px-2.5 w-2/5">Find in Source Code</th>
+          <th class="py-2 px-2.5 w-2/5">Replace With (Rectified)</th>
+          <th class="py-2 px-2 text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+window.copySnippetText = function(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Snippet copied to clipboard!');
+  });
+};
+
+function generateSearchReplacePlainText() {
+  if (!currentRemediation || !currentRemediation.actions) return '';
+  let out = 'EXACT CODE REPLACEMENT GUIDE FOR YOUR SOURCE CODE:\n\n';
+  currentRemediation.actions.forEach((a, i) => {
+    out += `[#${i+1}] Rule: ${a.ruleId} (${a.title})\n`;
+    out += `FIND IN YOUR SOURCE:\n${a.originalSnippet}\n\n`;
+    out += `REPLACE WITH RECTIFIED CODE:\n${a.fixedSnippet}\n`;
+    out += `---------------------------------------------------------\n\n`;
+  });
+  return out;
 }
 
 function downloadRemediatedBundle() {
@@ -623,18 +713,56 @@ function downloadRemediatedBundle() {
     return;
   }
 
-  const html = currentRemediation.remediatedHtml;
+  let html = currentRemediation.remediatedHtml;
+
+  // If a live URL was scanned, ensure base href is present so the downloaded file loads 100% of the CSS/images
+  if (currentScannedUrl && !html.includes('<base href=')) {
+    const baseTag = `<base href="${currentScannedUrl}">`;
+    if (/<head\b[^>]*>/i.test(html)) {
+      html = html.replace(/<head\b[^>]*>/i, `$& \n  ${baseTag}`);
+    } else {
+      html = `${baseTag}\n${html}`;
+    }
+  }
+
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `remediated-index-${Date.now()}.html`;
+  a.download = `remediated-website-${Date.now()}.html`;
   a.click();
   URL.revokeObjectURL(url);
 }
 
 /* ----------------------------------------------------
- * INNOVATION 1: INTERACTIVE KEYBOARD TAB-ORDER SIMULATOR
+ * APPLY FIX TO REAL WEBSITE MODAL
+ * ---------------------------------------------------- */
+function setupApplyModal() {
+  const modal = document.getElementById('applyModal');
+  document.getElementById('openApplyModalBtn')?.addEventListener('click', () => {
+    modal?.classList.remove('hidden');
+  });
+  document.getElementById('closeApplyModalBtn')?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+  });
+}
+
+window.copyRuntimeTag = function() {
+  const tag = '<script src="https://cdn.jsdelivr.net/gh/sritheanmathy-spec/proj@main/engine/runtime-heal.js" async></script>';
+  navigator.clipboard.writeText(tag).then(() => {
+    alert('1-Line Embed Script copied! Paste it into your website header or Google Tag Manager.');
+  });
+};
+
+window.copyConsoleSnippet = function() {
+  const cmd = "fetch('https://cdn.jsdelivr.net/gh/sritheanmathy-spec/proj@main/engine/runtime-heal.js').then(r=>r.text()).then(eval);";
+  navigator.clipboard.writeText(cmd).then(() => {
+    alert('Console command copied! Open your website, press F12, click Console, paste and hit Enter.');
+  });
+};
+
+/* ----------------------------------------------------
+ * INTERACTIVE KEYBOARD TAB-ORDER SIMULATOR
  * ---------------------------------------------------- */
 function setupKeyboardTabSimulator() {
   document.getElementById('simulateTabOrderBtn')?.addEventListener('click', runTabOrderSimulation);
@@ -647,11 +775,9 @@ function runTabOrderSimulation() {
 
   const doc = iframe.contentDocument;
 
-  // Clear previous badges
   doc.querySelectorAll('.a11y-tab-badge').forEach(b => b.remove());
   doc.querySelectorAll('.a11y-focused-el').forEach(el => el.classList.remove('a11y-focused-el'));
 
-  // Inject focus outline style if not present
   if (!doc.getElementById('a11y-focus-styles')) {
     const style = doc.createElement('style');
     style.id = 'a11y-focus-styles';
@@ -684,7 +810,6 @@ function runTabOrderSimulation() {
     doc.head.appendChild(style);
   }
 
-  // Find all sequentially focusable controls
   const focusable = Array.from(doc.body.querySelectorAll(
     'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
   ));
@@ -700,7 +825,6 @@ function runTabOrderSimulation() {
 
   let step = 0;
   function highlightNext() {
-    // Unfocus previous
     focusable.forEach(el => el.classList.remove('a11y-focused-el'));
 
     if (step >= focusable.length) {
@@ -714,7 +838,6 @@ function runTabOrderSimulation() {
     currentEl.classList.add('a11y-focused-el');
     currentEl.focus();
 
-    // Add badge
     if (!currentEl.querySelector('.a11y-tab-badge')) {
       const badge = doc.createElement('span');
       badge.className = 'a11y-tab-badge';
@@ -737,7 +860,7 @@ function runTabOrderSimulation() {
 }
 
 /* ----------------------------------------------------
- * INNOVATION 4: OFFICIAL VPAT 2.4 LEGAL CONFORMANCE MODAL
+ * OFFICIAL VPAT 2.4 LEGAL CONFORMANCE MODAL
  * ---------------------------------------------------- */
 function setupVpatModal() {
   const modal = document.getElementById('vpatModal');
@@ -791,26 +914,30 @@ function updateRenderedPreview(html) {
   const iframe = document.getElementById('renderedPreview');
   if (!iframe) return;
 
-  const styledDocument = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 16px; background: #ffffff; color: #0f172a; margin: 0; line-height: 1.5; }
-        h1 { font-size: 1.35rem; margin-top: 0; color: #0f172a; }
-        h2 { font-size: 1.15rem; color: #1e293b; }
-        h4 { font-size: 0.95rem; color: #475569; }
-        img { max-width: 140px; height: auto; border-radius: 4px; border: 1px solid #e2e8f0; display: block; margin: 8px 0; }
-        input, select, textarea { display: block; margin: 4px 0 12px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; width: 220px; box-sizing: border-box; }
-        label { display: block; font-size: 11px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
-        button { background: #2563eb; color: #ffffff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-block; margin-top: 4px; }
-      </style>
-    </head>
-    <body>
-      ${html}
-    </body>
-    </html>`;
+  // If a full HTML document is provided (with <html> and <body>), use it directly
+  let styledDocument = html;
+  if (!html.includes('<html') && !html.includes('<body')) {
+    styledDocument = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 16px; background: #ffffff; color: #0f172a; margin: 0; line-height: 1.5; }
+          h1 { font-size: 1.35rem; margin-top: 0; color: #0f172a; }
+          h2 { font-size: 1.15rem; color: #1e293b; }
+          h4 { font-size: 0.95rem; color: #475569; }
+          img { max-width: 140px; height: auto; border-radius: 4px; border: 1px solid #e2e8f0; display: block; margin: 8px 0; }
+          input, select, textarea { display: block; margin: 4px 0 12px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; width: 220px; box-sizing: border-box; }
+          label { display: block; font-size: 11px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
+          button { background: #2563eb; color: #ffffff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-block; margin-top: 4px; }
+        </style>
+      </head>
+      <body>
+        ${html}
+      </body>
+      </html>`;
+  }
   iframe.srcdoc = styledDocument;
 }
 
@@ -942,6 +1069,7 @@ window.applyAiAlternative = function(newAlt) {
   }
 
   renderFrameworkCode();
+  renderExactReplaceTable();
   renderDiff(currentCode, res.remediatedHtml);
   document.getElementById('remediatedCode').textContent = res.remediatedHtml;
   updateRenderedPreview(res.remediatedHtml);
@@ -1085,6 +1213,31 @@ function setupUrlScanner() {
     modal?.classList.add('hidden');
   });
   document.getElementById('fetchUrlBtn')?.addEventListener('click', fetchAndRemediateUrl);
+  document.getElementById('openLiveHealBtn')?.addEventListener('click', openLiveHealedWebsite);
+}
+
+function showLiveHealButton(url) {
+  const btn = document.getElementById('openLiveHealBtn');
+  if (btn) {
+    btn.classList.remove('hidden');
+  }
+}
+
+function hideLiveHealButton() {
+  const btn = document.getElementById('openLiveHealBtn');
+  if (btn) {
+    btn.classList.add('hidden');
+  }
+}
+
+function openLiveHealedWebsite() {
+  if (!currentScannedUrl) return;
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (isLocal) {
+    window.open(`/api/live-heal?url=${encodeURIComponent(currentScannedUrl)}`, '_blank');
+  } else {
+    downloadRemediatedBundle();
+  }
 }
 
 window.setUrlPreset = function(url) {
@@ -1117,17 +1270,21 @@ async function fetchAndRemediateUrl() {
       const res = await fetch(publicProxy);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       let raw = await res.text();
-      const bodyMatch = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(raw);
-      htmlContent = (bodyMatch ? bodyMatch[1] : raw)
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, '<span class="icon">[SVG Icon]</span>')
-        .trim();
-      if (htmlContent.length > 25000) htmlContent = htmlContent.substring(0, 25000);
+      // Ensure <base href> is in head
+      const baseTag = `<base href="${targetUrl}">`;
+      if (/<head\b[^>]*>/i.test(raw)) {
+        htmlContent = raw.replace(/<head\b[^>]*>/i, `$& \n  ${baseTag}`);
+      } else {
+        htmlContent = `${baseTag}\n${raw}`;
+      }
     }
+
+    currentScannedUrl = targetUrl;
+    showLiveHealButton(targetUrl);
 
     document.getElementById('htmlEditor').value = htmlContent;
     updateCharCount(htmlContent.length);
-    document.getElementById('presetDescription').textContent = `Live Scanned URL: ${targetUrl}`;
+    document.getElementById('presetDescription').textContent = `Live Scanned URL: ${targetUrl} (Full Document Preserved with <base href>)`;
     document.getElementById('urlModal')?.classList.add('hidden');
 
     await runPipeline(false);
@@ -1148,7 +1305,7 @@ function setupKeyboardShortcuts() {
       e.preventDefault();
       runPipeline(false);
     } else if (e.key === 'Escape') {
-      document.querySelectorAll('#urlModal, #vpatModal, #cicdModal, #aiModal').forEach(m => m.classList.add('hidden'));
+      document.querySelectorAll('#urlModal, #vpatModal, #cicdModal, #aiModal, #applyModal').forEach(m => m.classList.add('hidden'));
     }
   });
 }
@@ -1159,7 +1316,7 @@ function copyRemediatedCode() {
   navigator.clipboard.writeText(code).then(() => {
     const btn = document.getElementById('copyCodeBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<span>Copied</span>';
+    btn.innerHTML = '<span>Copied Full HTML</span>';
     setTimeout(() => { btn.innerHTML = originalText; }, 2000);
   });
 }

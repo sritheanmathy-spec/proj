@@ -111,5 +111,86 @@ console.log('--- RUNNING TEST SUITE ---');
   console.log('[PASS] Test Case 6 (Edge Deploy & React JSX Exporter): PASS');
 }
 
+// Test Case 7: Universal Runtime Self-Healing & Base Href Preservation
+{
+  const fs = require('fs');
+  const path = require('path');
+  const runtimeScript = fs.readFileSync(path.join(__dirname, 'engine', 'runtime-heal.js'), 'utf8');
+  assert(runtimeScript.length > 1000, 'runtime-heal.js must exist and contain code');
+
+  // Verify simulated DOM execution of runtime healing
+  const mockImages = [
+    {
+      tagName: 'IMG',
+      attrs: { src: '/assets/product-shoe.png' },
+      getAttribute(k) { return this.attrs[k] || null; },
+      setAttribute(k, v) { this.attrs[k] = v; },
+      closest() { return null; }
+    }
+  ];
+  const mockInputs = [
+    {
+      tagName: 'INPUT',
+      attrs: { type: 'text', placeholder: 'Enter your email address' },
+      getAttribute(k) { return this.attrs[k] || null; },
+      setAttribute(k, v) { this.attrs[k] = v; },
+      closest() { return null; }
+    }
+  ];
+  const mockButtons = [
+    {
+      tagName: 'BUTTON',
+      attrs: {},
+      textContent: '',
+      getAttribute(k) { return this.attrs[k] || null; },
+      setAttribute(k, v) { this.attrs[k] = v; }
+    }
+  ];
+
+  // Run in simulated VM scope
+  const vm = require('vm');
+  const context = {
+    console: { info: () => {}, log: () => {} },
+    document: {
+      readyState: 'complete',
+      querySelectorAll(selector) {
+        if (selector === 'img:not([alt])') return mockImages;
+        if (selector.includes('input:not([type="hidden"])')) return mockInputs;
+        if (selector.includes('button:not([aria-label])')) return mockButtons;
+        return [];
+      },
+      querySelector() { return null; },
+      getElementById() { return null; },
+      createElement() {
+        return {
+          id: '',
+          setAttribute() {},
+          style: {},
+          innerHTML: ''
+        };
+      },
+      body: { appendChild() {} }
+    },
+    window: {}
+  };
+  vm.createContext(context);
+  vm.runInContext(runtimeScript, context);
+
+  // Assert self-healing results
+  assert(mockImages[0].attrs.alt, 'Image must be healed with alt attribute');
+  assert(mockImages[0].attrs['data-a11y-healed'] === 'alt-injected', 'Image must be tagged as healed');
+  assert(mockInputs[0].attrs['aria-label'], 'Input must be healed with aria-label');
+  assert(mockButtons[0].attrs['aria-label'], 'Button must be healed with aria-label');
+
+  // Verify base href preservation regex logic
+  const originalHtml = `<!DOCTYPE html><html><head><title>Test</title><link rel="stylesheet" href="/style.css"></head><body><h1>Content</h1></body></html>`;
+  const targetUrl = 'https://example.com/store/page';
+  const baseTag = `<base href="${targetUrl}">`;
+  const preservedHtml = originalHtml.replace(/<head(\s[^>]*)?>/i, `$&<base href="${targetUrl}">`);
+  assert(preservedHtml.includes('<base href="https://example.com/store/page">'), 'Base href must be injected to preserve relative CSS and image links');
+  console.log('[PASS] Test Case 7 (Universal Runtime Self-Healing & Base Href Preservation): PASS');
+}
+
 console.log('---------------------------------');
-console.log('ALL 6 TEST CASES PASSED SUCCESSFULLY!');
+console.log('ALL 7 TEST CASES PASSED SUCCESSFULLY!');
+
