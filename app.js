@@ -673,17 +673,30 @@ async function fetchAndRemediateUrl() {
   btn.disabled = true;
 
   try {
-    const proxyUrl = `/api/fetch-url?url=${encodeURIComponent(targetUrl)}`;
-    const res = await fetch(proxyUrl);
-    const data = await res.json();
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    let htmlContent = '';
 
-    if (!data.success) {
-      alert(`Could not fetch URL: ${data.error}`);
-      return;
+    if (isLocal) {
+      const proxyUrl = `/api/fetch-url?url=${encodeURIComponent(targetUrl)}`;
+      const res = await fetch(proxyUrl);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      htmlContent = data.html;
+    } else {
+      const publicProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      const res = await fetch(publicProxy);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      let raw = await res.text();
+      const bodyMatch = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(raw);
+      htmlContent = (bodyMatch ? bodyMatch[1] : raw)
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, '<span class="icon">[SVG Icon]</span>')
+        .trim();
+      if (htmlContent.length > 25000) htmlContent = htmlContent.substring(0, 25000);
     }
 
-    document.getElementById('htmlEditor').value = data.html;
-    document.getElementById('presetDescription').textContent = `Live Scanned URL: ${targetUrl} (${data.length} characters analyzed)`;
+    document.getElementById('htmlEditor').value = htmlContent;
+    document.getElementById('presetDescription').textContent = `Live Scanned URL: ${targetUrl}`;
     document.getElementById('urlModal')?.classList.add('hidden');
 
     await runPipeline(false);
