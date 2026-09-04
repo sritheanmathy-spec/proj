@@ -73,5 +73,33 @@ Navigate to `http://localhost:3000` (or `http://localhost:3001`).
 - `engine/cicd.js` — GitHub Action workflow and Git patch generator.
 - `engine/ai_inspector.js` — AI transparency model reasoning and alternative switcher.
 - `engine/screenreader.js` — Screen reader acoustic stream simulator.
-- `engine/report.js` — Enterprise WCAG 2.1 AA compliance certificate generator.
-- `test.js` — Automated verification and regression test suite.
+- `engine/runtime-heal.js` — Universal client-side runtime self-healing engine (<8KB) for instant 1-line script deployment.
+- `engine/edge_deploy.js` — Cloudflare Edge Worker (HTMLRewriter) and React JSX/Vue exporter.
+- `engine/vpat.js` — Official VPAT 2.4 / Section 508 Accessibility Conformance Report (ACR) generator with SHA-256 digest.
+- `test.js` — Automated verification and regression test suite (7 comprehensive test suites).
+
+---
+
+## Applying Remediations to Real Websites
+
+### 1. Universal 1-Line Drop-In Script (WordPress, Shopify, Squarespace, Webflow)
+Add the runtime script to your website's `<head>` or before `</body>`:
+```html
+<script src="https://cdn.jsdelivr.net/gh/sritheanmathy-spec/proj@main/engine/runtime-heal.js" async></script>
+```
+Heals missing image alt attributes, unlabelled form inputs, empty buttons, contrast defects, and heading hierarchies dynamically in the live DOM.
+
+### 2. Live DevTools Console Tester (Zero-Install Verification)
+Inspect and remediate any client website live in the browser console:
+```javascript
+const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/sritheanmathy-spec/proj@main/engine/runtime-heal.js';document.head.appendChild(s);
+```
+
+### 3. Edge CDN HTMLRewriter (Cloudflare / Fastly)
+Stream and patch accessibility attributes at the CDN edge with zero backend code changes.
+
+### 4. Search & Replace Source Guide
+Exact "Find in your template" vs "Replace with rectified code" tables with 1-click copy for developers.
+
+### 5. Official VPAT 2.4 / Section 508 Legal Conformance Report
+Instant ACR document generation with cryptographic SHA-256 compliance hash for enterprise procurement.
