@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A11y Remediation Engine — Detect → Fix → Verify</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -24,12 +23,21 @@
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    @keyframes pulse-audio {
+      0%, 100% { height: 4px; }
+      50% { height: 16px; }
+    }
+    .audio-bar-1 { animation: pulse-audio 0.6s infinite ease-in-out; }
+    .audio-bar-2 { animation: pulse-audio 0.8s infinite ease-in-out 0.2s; }
+    .audio-bar-3 { animation: pulse-audio 0.5s infinite ease-in-out 0.4s; }
+    .audio-bar-4 { animation: pulse-audio 0.7s infinite ease-in-out 0.1s; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500/30">
 
   <!-- TOP HEADER -->
-  <header class="border-b border-slate-800 bg-slate-900/70 backdrop-blur-md sticky top-0 z-50 px-6 py-3.5">
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-6 py-3.5">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
       
       <!-- Brand & Pitch Hook -->
@@ -44,7 +52,7 @@
               WCAG 2.1 AA
             </span>
           </div>
-          <p class="text-xs text-slate-400">The Layer Between Detecting Problems and Fixing Them</p>
+          <p class="text-xs text-slate-400">Detect → Fix (Hybrid) → Verify (Feedback Loop)</p>
         </div>
       </div>
 
@@ -57,7 +65,7 @@
         <span class="text-slate-600 text-xs">→</span>
         <div id="step-indicator-2" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400">
           <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-          <span>2. Fix (Hybrid)</span>
+          <span>2. Fix</span>
         </div>
         <span class="text-slate-600 text-xs">→</span>
         <div id="step-indicator-3" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400">
@@ -66,13 +74,21 @@
         </div>
       </div>
 
-      <!-- Action Primary Buttons -->
+      <!-- Primary Action Buttons -->
       <div class="flex items-center gap-2">
-        <button id="stepModeBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all shadow-sm">
-          <span>🎬</span>
-          <span>Step-by-Step Pitch</span>
+        <button id="openUrlModalBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-800/60 transition shadow-sm">
+          <span>🌐</span>
+          <span>Scan Live URL</span>
         </button>
-        <button id="runPipelineBtn" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-md shadow-indigo-600/30">
+        <button id="exportCertBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-800/60 transition shadow-sm">
+          <span>📄</span>
+          <span>Certificate</span>
+        </button>
+        <button id="stepModeBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-sm">
+          <span>🎬</span>
+          <span>Pitch Mode</span>
+        </button>
+        <button id="runPipelineBtn" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md shadow-indigo-600/30">
           <span>⚡</span>
           <span>Run Pipeline</span>
         </button>
@@ -80,6 +96,44 @@
 
     </div>
   </header>
+
+  <!-- SCREEN READER AUDIO SIMULATOR BAR -->
+  <div class="border-b border-indigo-950/60 bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 px-6 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 text-xs font-bold text-indigo-300">
+          <span>🔊</span>
+          <span>Screen Reader Audio Simulation:</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="playBeforeAudioBtn" class="px-3 py-1 bg-rose-950/70 hover:bg-rose-900 text-rose-300 border border-rose-800/60 rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
+            <span>▶️</span>
+            <span>Listen to BEFORE</span>
+          </button>
+          <button id="playAfterAudioBtn" class="px-3 py-1 bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/60 rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
+            <span>▶️</span>
+            <span>Listen to AFTER</span>
+          </button>
+          <button id="stopAudioBtn" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg text-xs transition">
+            ⏹️ Stop
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Speech Transcript Ticker -->
+      <div class="flex-1 max-w-lg flex items-center gap-2 bg-slate-950/60 px-3 py-1 rounded-lg border border-slate-800">
+        <!-- Audio waveform animation -->
+        <div id="audioWaveform" class="hidden items-center gap-0.5 h-4">
+          <span class="w-1 bg-indigo-400 rounded-full audio-bar-1"></span>
+          <span class="w-1 bg-indigo-400 rounded-full audio-bar-2"></span>
+          <span class="w-1 bg-indigo-400 rounded-full audio-bar-3"></span>
+          <span class="w-1 bg-indigo-400 rounded-full audio-bar-4"></span>
+        </div>
+        <span class="text-[11px] text-slate-500 font-mono">Narrating:</span>
+        <span id="speechTicker" class="text-[11px] text-indigo-200 truncate italic">Ready to simulate speech stream.</span>
+      </div>
+    </div>
+  </div>
 
   <!-- SUBHEADER: PRESETS & CONTEXT -->
   <div class="border-b border-slate-800/80 bg-slate-900/40 px-6 py-2.5">
@@ -111,7 +165,7 @@
           <span>source-input.html</span>
           <span class="text-[10px] text-slate-500">Editable Snippet</span>
         </div>
-        <textarea id="htmlEditor" rows="8" spellcheck="false" class="w-full bg-slate-950 p-3.5 font-mono text-xs text-slate-200 leading-relaxed focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y border-none" placeholder="Paste HTML code to analyze..."></textarea>
+        <textarea id="htmlEditor" rows="7" spellcheck="false" class="w-full bg-slate-950 p-3.5 font-mono text-xs text-slate-200 leading-relaxed focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y border-none" placeholder="Paste HTML code to analyze..."></textarea>
       </div>
 
       <!-- Detected Violations List -->
@@ -142,7 +196,7 @@
           <span>⚙️ Deterministic vs. 🧠 AI Philosophy</span>
         </div>
         <p class="text-[11px] text-slate-400 leading-relaxed">
-          <strong>Deterministic Math/Rules:</strong> Heading order & contrast formulas.<br>
+          <strong>Deterministic Math/Rules:</strong> Heading hierarchy & luminance math.<br>
           <strong>Contextual AI / LLM:</strong> Missing alt text semantic reasoning.
         </p>
       </div>
@@ -222,11 +276,66 @@
 
   </main>
 
+  <!-- LIVE URL SCANNER MODAL -->
+  <div id="urlModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-cyan-300 font-bold text-sm">
+          <span>🌐</span>
+          <span>Scan Live Website URL</span>
+        </div>
+        <button id="closeUrlModalBtn" class="text-slate-400 hover:text-white text-base">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-400 leading-relaxed">
+        Enter any public web address. Our backend proxy will fetch the HTML, sanitize assets, and feed it into the <strong>Detect → Fix → Verify</strong> pipeline.
+      </p>
+
+      <div>
+        <label class="block text-xs font-mono text-slate-400 mb-1">Target Website URL:</label>
+        <input id="targetUrlInput" type="url" placeholder="https://example.com" value="https://example.com" class="w-full bg-slate-950 px-3.5 py-2 rounded-lg border border-slate-800 font-mono text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500">
+      </div>
+
+      <!-- Quick Shortcuts -->
+      <div>
+        <span class="text-[11px] text-slate-500 block mb-1.5">Quick Examples:</span>
+        <div class="flex flex-wrap gap-1.5">
+          <button onclick="setUrlPreset('https://example.com')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 rounded border border-slate-700">example.com</button>
+          <button onclick="setUrlPreset('https://news.ycombinator.com')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 rounded border border-slate-700">Hacker News</button>
+          <button onclick="setUrlPreset('https://wikipedia.org')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 rounded border border-slate-700">Wikipedia</button>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+        <button id="cancelUrlBtn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg">Cancel</button>
+        <button id="fetchUrlBtn" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-lg shadow flex items-center gap-1.5">
+          <span>Fetch & Auto-Remediate</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CERTIFICATE AUDIT MODAL -->
+  <div id="certModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full p-6 shadow-2xl my-8">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+        <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+          <span>📄</span>
+          <span>WCAG 2.1 AA Compliance Audit Certificate</span>
+        </div>
+        <button id="closeCertModalBtn" class="text-slate-400 hover:text-white text-base">✕</button>
+      </div>
+      <div id="certContentContainer">
+        <!-- Rendered certificate dynamically placed here -->
+      </div>
+    </div>
+  </div>
+
   <!-- FOOTER -->
   <footer class="border-t border-slate-800/80 bg-slate-900/50 py-3 px-6 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
       <div>
-        <span>Automated Accessibility Remediation Prototype</span> &bull; 
+        <span>Automated Accessibility Remediation Engine</span> &bull; 
         <span class="text-slate-400">Detect &rarr; Fix &rarr; Verify</span>
       </div>
       <div class="text-slate-400 font-mono text-[11px]">
@@ -240,6 +349,8 @@
   <script src="engine/remediator.js"></script>
   <script src="engine/verifier.js"></script>
   <script src="engine/diff.js"></script>
+  <script src="engine/screenreader.js"></script>
+  <script src="engine/report.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

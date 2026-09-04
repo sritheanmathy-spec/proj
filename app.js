@@ -1,5 +1,10 @@
 ﻿/**
- * A11y Remediation Engine — UI Application Controller
+ * A11y Remediation Engine — Full UI Controller
+ * Includes:
+ * - 3-Stage Pipeline Execution & Pitch Mode
+ * - Screen Reader Audio Simulator (Web Speech API)
+ * - Live Website URL Proxy Ingestion
+ * - WCAG Compliance Audit Certificate Generator
  */
 
 // Presets
@@ -45,16 +50,21 @@ const PRESETS = {
 let currentViolations = [];
 let currentRemediation = null;
 let currentVerification = null;
-let isStepModeActive = false;
 
-// Initialize when DOM is loaded
+// Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   setupPresetButtons();
   setupActionButtons();
   setupViewTabs();
+  setupScreenReaderAudio();
+  setupUrlScanner();
+  setupCertModal();
   loadPreset('script');
 });
 
+/* ----------------------------------------------------
+ * PRESET & TAB MANAGEMENT
+ * ---------------------------------------------------- */
 function setupPresetButtons() {
   const container = document.getElementById('presetButtons');
   if (!container) return;
@@ -78,13 +88,11 @@ function loadPreset(key) {
   const preset = PRESETS[key];
   if (!preset) return;
   const editor = document.getElementById('htmlEditor');
-  if (editor) {
-    editor.value = preset.html;
-  }
+  if (editor) editor.value = preset.html;
+
   const descEl = document.getElementById('presetDescription');
-  if (descEl) {
-    descEl.textContent = preset.description;
-  }
+  if (descEl) descEl.textContent = preset.description;
+
   resetPipelineUI();
 }
 
@@ -105,13 +113,14 @@ function resetPipelineUI() {
   updateBadge('remediateCountBadge', 0, 'slate');
   updateBadge('verifyCountBadge', 0, 'slate');
   setPipelineStep(0);
+  stopAudioNarration();
 }
 
 function updateBadge(id, count, color = 'indigo') {
   const el = document.getElementById(id);
   if (!el) return;
   el.textContent = count;
-  if (count > 0) {
+  if (count > 0 || (typeof count === 'string' && count.includes('/'))) {
     el.className = `text-xs px-2 py-0.5 rounded-full font-bold ${color === 'emerald' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : color === 'rose' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'}`;
   } else {
     el.className = 'text-xs px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700';
@@ -157,6 +166,9 @@ function setPipelineStep(step) {
   }
 }
 
+/* ----------------------------------------------------
+ * PIPELINE CORE EXECUTION
+ * ---------------------------------------------------- */
 async function runPipeline(stepMode = false) {
   const inputHtml = document.getElementById('htmlEditor').value.trim();
   if (!inputHtml) {
@@ -193,13 +205,13 @@ async function runPipeline(stepMode = false) {
   renderVerification(verification);
   updateBadge('verifyCountBadge', `${verification.resolvedCount}/${verification.initialCount}`, verification.isComplete ? 'emerald' : 'amber');
 
-  // Render Diff and Code Views
+  // Render Diff, Clean Code, Preview
   renderDiff(inputHtml, remediationResult.remediatedHtml);
   document.getElementById('remediatedCode').textContent = remediationResult.remediatedHtml;
   updateRenderedPreview(remediationResult.remediatedHtml);
 
   if (stepMode) await delay(500);
-  setPipelineStep(4); // All done
+  setPipelineStep(4);
 }
 
 function renderViolations(violations) {
@@ -295,7 +307,7 @@ function renderVerification(verification) {
         <div class="h-full ${verification.isComplete ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${verification.successRate}%"></div>
       </div>
       <div class="flex justify-between text-[10px] text-slate-400 mt-2 font-medium">
-        <span>Initial Violations: <strong class="text-slate-200">${verification.initialCount}</strong></span>
+        <span>Initial Errors: <strong class="text-slate-200">${verification.initialCount}</strong></span>
         <span>Verified Fixed: <strong class="text-emerald-400">${verification.resolvedCount}</strong></span>
         <span>Needs Review: <strong class="text-amber-400">${verification.reviewCount}</strong></span>
       </div>
@@ -359,6 +371,183 @@ function updateRenderedPreview(html) {
   iframe.srcdoc = styledDocument;
 }
 
+/* ----------------------------------------------------
+ * FEATURE 1: SCREEN READER AUDIO SIMULATOR
+ * ---------------------------------------------------- */
+function setupScreenReaderAudio() {
+  document.getElementById('playBeforeAudioBtn')?.addEventListener('click', playBeforeNarration);
+  document.getElementById('playAfterAudioBtn')?.addEventListener('click', playAfterNarration);
+  document.getElementById('stopAudioBtn')?.addEventListener('click', stopAudioNarration);
+}
+
+function playBeforeNarration() {
+  const inputHtml = document.getElementById('htmlEditor').value.trim();
+  if (!inputHtml) return;
+
+  stopAudioNarration();
+  const scriptData = window.A11yScreenReader.generateSpeechScript(inputHtml);
+
+  setAudioTicker('Playing BEFORE (Unremediated Screen Reader Stream)...');
+  showAudioWaveform(true);
+
+  window.A11yScreenReader.speakScript(scriptData.fullText, {
+    rate: 1.0,
+    pitch: 0.95,
+    onBoundary: (e) => {
+      const words = scriptData.fullText.substring(e.charIndex, e.charIndex + 30);
+      setAudioTicker(`Reading: "${words}..."`);
+    },
+    onEnd: () => {
+      setAudioTicker('Finished BEFORE narration. Try playing AFTER to hear the difference!');
+      showAudioWaveform(false);
+    }
+  });
+}
+
+function playAfterNarration() {
+  let modHtml = currentRemediation ? currentRemediation.remediatedHtml : null;
+  if (!modHtml) {
+    // Auto remediate first
+    const inputHtml = document.getElementById('htmlEditor').value.trim();
+    if (!inputHtml) return;
+    const res = window.A11yRemediator.remediateHtml(inputHtml);
+    modHtml = res.remediatedHtml;
+  }
+
+  stopAudioNarration();
+  const scriptData = window.A11yScreenReader.generateSpeechScript(modHtml);
+
+  setAudioTicker('Playing AFTER (Verified Accessible Screen Reader Stream)...');
+  showAudioWaveform(true);
+
+  window.A11yScreenReader.speakScript(scriptData.fullText, {
+    rate: 1.05,
+    pitch: 1.05,
+    onBoundary: (e) => {
+      const words = scriptData.fullText.substring(e.charIndex, e.charIndex + 30);
+      setAudioTicker(`Reading: "${words}..."`);
+    },
+    onEnd: () => {
+      setAudioTicker('Finished AFTER narration. Clear, verified accessibility structure!');
+      showAudioWaveform(false);
+    }
+  });
+}
+
+function stopAudioNarration() {
+  window.A11yScreenReader?.stopSpeech();
+  showAudioWaveform(false);
+  setAudioTicker('Audio stopped. Ready.');
+}
+
+function setAudioTicker(text) {
+  const el = document.getElementById('speechTicker');
+  if (el) el.textContent = text;
+}
+
+function showAudioWaveform(show) {
+  const wf = document.getElementById('audioWaveform');
+  if (!wf) return;
+  if (show) {
+    wf.classList.remove('hidden');
+    wf.classList.add('flex');
+  } else {
+    wf.classList.add('hidden');
+    wf.classList.remove('flex');
+  }
+}
+
+/* ----------------------------------------------------
+ * FEATURE 2: LIVE WEBSITE URL SCANNER
+ * ---------------------------------------------------- */
+function setupUrlScanner() {
+  const modal = document.getElementById('urlModal');
+  document.getElementById('openUrlModalBtn')?.addEventListener('click', () => {
+    modal?.classList.remove('hidden');
+  });
+  document.getElementById('closeUrlModalBtn')?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+  });
+  document.getElementById('cancelUrlBtn')?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+  });
+  document.getElementById('fetchUrlBtn')?.addEventListener('click', fetchAndRemediateUrl);
+}
+
+window.setUrlPreset = function(url) {
+  const input = document.getElementById('targetUrlInput');
+  if (input) input.value = url;
+};
+
+async function fetchAndRemediateUrl() {
+  const input = document.getElementById('targetUrlInput');
+  const targetUrl = input?.value.trim();
+  if (!targetUrl) return;
+
+  const btn = document.getElementById('fetchUrlBtn');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<span>⏳ Fetching URL...</span>';
+  btn.disabled = true;
+
+  try {
+    const proxyUrl = `/api/fetch-url?url=${encodeURIComponent(targetUrl)}`;
+    const res = await fetch(proxyUrl);
+    const data = await res.json();
+
+    if (!data.success) {
+      alert(`Could not fetch URL: ${data.error}`);
+      return;
+    }
+
+    document.getElementById('htmlEditor').value = data.html;
+    document.getElementById('presetDescription').textContent = `Live Scanned URL: ${targetUrl} (${data.length} characters analyzed)`;
+    document.getElementById('urlModal')?.classList.add('hidden');
+
+    // Run pipeline automatically
+    await runPipeline(false);
+  } catch (err) {
+    alert(`Error connecting to fetch proxy: ${err.message}`);
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
+
+/* ----------------------------------------------------
+ * FEATURE 3: WCAG COMPLIANCE CERTIFICATE AUDIT
+ * ---------------------------------------------------- */
+function setupCertModal() {
+  const modal = document.getElementById('certModal');
+  document.getElementById('exportCertBtn')?.addEventListener('click', openCertModal);
+  document.getElementById('closeCertModalBtn')?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+  });
+}
+
+async function openCertModal() {
+  const modal = document.getElementById('certModal');
+  const container = document.getElementById('certContentContainer');
+  if (!modal || !container) return;
+
+  // If pipeline hasn't run yet, run it
+  if (!currentVerification) {
+    await runPipeline(false);
+  }
+
+  const certHtml = window.A11yReport.generateCertificateHtml(currentVerification);
+  container.innerHTML = certHtml;
+  modal.classList.remove('hidden');
+}
+
+window.downloadAuditJson = function() {
+  if (currentVerification) {
+    window.A11yReport.exportAuditJson(currentVerification);
+  }
+};
+
+/* ----------------------------------------------------
+ * UTILITIES
+ * ---------------------------------------------------- */
 function copyRemediatedCode() {
   const code = document.getElementById('remediatedCode')?.textContent;
   if (!code) return;
