@@ -14,7 +14,7 @@ Prepare for these top 5 questions that technical judges, product managers, and a
 
 ### Q2: "What happens when an automated fix introduces a new violation or doesn't work?"
 **Answer:**
-> "That is why Stage 3—the Verification Loop—is our core differentiator. If the second-pass scanner detects that a rule is still failing, or if a secondary issue was created, our system flags it with **Needs Review ⚠️** instead of falsely claiming it's resolved. We never blindly ship unverified code."
+> "That is why Stage 3—the Verification Loop—is our core differentiator. If the second-pass scanner detects that a rule is still failing, or if a secondary issue was created, our system flags it with **Needs Review ️** instead of falsely claiming it's resolved. We never blindly ship unverified code."
 
 ---
 

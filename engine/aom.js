@@ -1,4 +1,4 @@
-﻿/**
+/**
  * A11y Remediation Engine — Accessible Object Model (AOM) Inspector
  * Constructs and compares the Accessibility Tree (Roles, Names, States)
  * before and after remediation, mirroring Chrome DevTools and NVDA object trees.
@@ -180,28 +180,28 @@
 
   function renderAomTreeHtml(tree, title = 'Accessibility Tree') {
     let html = `
-      <div class="space-y-1 font-mono text-xs">
-        <div class="flex items-center gap-2 p-2 bg-slate-950 rounded-lg border border-slate-800 text-slate-300">
-          <span class="text-indigo-400 font-bold">▾ [${tree.role}]</span>
+      <div class="space-y-1.5 font-mono text-xs">
+        <div class="flex items-center gap-2 p-2 bg-slate-100 rounded border border-slate-200 text-slate-800">
+          <span class="text-blue-700 font-bold">[${tree.role}]</span>
           <span>${tree.name}</span>
         </div>
-        <div class="pl-4 space-y-1 border-l border-slate-800 ml-3 mt-1">`;
+        <div class="pl-3.5 space-y-1.5 border-l-2 border-slate-200 ml-3 mt-1.5">`;
 
     if (tree.children.length === 0) {
-      html += `<div class="text-slate-500 italic p-2 text-[11px]">No accessibility nodes detected.</div>`;
+      html += `<div class="text-slate-500 italic p-2 text-xs">No accessibility nodes detected.</div>`;
     } else {
       tree.children.forEach(node => {
         const isValid = node.valid;
         html += `
-          <div class="flex items-center justify-between p-2 rounded-lg border ${isValid ? 'bg-slate-900/60 border-slate-800 text-slate-200' : 'bg-rose-950/30 border-rose-800/60 text-rose-300'} transition hover:border-slate-700">
+          <div class="flex items-center justify-between p-2 rounded border ${isValid ? 'bg-white border-slate-200 text-slate-800' : 'bg-rose-50/70 border-rose-200 text-rose-900'} transition hover:border-slate-300">
             <div class="flex items-center gap-2 truncate">
-              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${isValid ? 'bg-indigo-950 text-indigo-300 border border-indigo-800' : 'bg-rose-900 text-rose-200 border border-rose-700'}">
+              <span class="px-1.5 py-0.5 rounded text-[11px] font-semibold ${isValid ? 'bg-slate-100 text-slate-700 border border-slate-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
                 ${node.role}${node.level ? ' ' + node.level : ''}
               </span>
-              <span class="truncate font-semibold">${node.name}</span>
+              <span class="truncate font-medium text-slate-900">${node.name}</span>
             </div>
-            <div class="text-[10px] font-semibold flex items-center gap-1.5 flex-shrink-0">
-              ${isValid ? `<span class="text-emerald-400">✓ ${node.note || 'Accessible'}</span>` : `<span class="text-rose-400 font-bold">⚠ ${node.note}</span>`}
+            <div class="text-[11px] font-semibold flex items-center gap-1.5 flex-shrink-0">
+              ${isValid ? `<span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">${node.note || 'Accessible'}</span>` : `<span class="text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">${node.note}</span>`}
             </div>
           </div>`;
       });

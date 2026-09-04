@@ -1,268 +1,459 @@
-﻿<!DOCTYPE html>
-<html lang="en" class="dark">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A11y Remediation Engine — High-Level Enterprise Platform</title>
+  <title>A11y Remediation Engine — Automated Accessibility Remediation & Verification</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
           }
         }
       }
     }
   </script>
   <style>
-    /* Custom scrollbars */
+    /* Enterprise clean scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-    @keyframes pulse-audio {
-      0%, 100% { height: 4px; }
-      50% { height: 16px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    pre, code, kbd, textarea {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
     }
-    .audio-bar-1 { animation: pulse-audio 0.6s infinite ease-in-out; }
-    .audio-bar-2 { animation: pulse-audio 0.8s infinite ease-in-out 0.2s; }
-    .audio-bar-3 { animation: pulse-audio 0.5s infinite ease-in-out 0.4s; }
-    .audio-bar-4 { animation: pulse-audio 0.7s infinite ease-in-out 0.1s; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500/30">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-blue-100 selection:text-blue-900">
 
-  <!-- TOP HEADER -->
-  <header class="border-b border-slate-800/90 bg-slate-900/90 backdrop-blur-xl sticky top-0 z-40 px-6 py-3">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+  <!-- TOP ENTERPRISE NAVIGATION BAR -->
+  <header class="border-b border-slate-200 bg-white sticky top-0 z-40 px-6 py-2.5 shadow-sm">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
       
       <!-- Brand & Platform Badges -->
       <div class="flex items-center gap-3">
-        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-black text-lg">
-          A
+        <div class="h-8 w-8 rounded bg-blue-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-bold text-sm sm:text-base tracking-tight text-white flex items-center gap-1.5">
-              <span>A11y Remediation Engine</span>
-              <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 font-mono font-bold">v2.0 PRO</span>
-            </h1>
-            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-semibold">
+            <span class="font-bold text-sm tracking-tight text-slate-900">A11y Remediation Engine</span>
+            <span class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-300 font-semibold">
+              v2.0 ENTERPRISE
+            </span>
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold">
               WCAG 2.1 AA
             </span>
           </div>
-          <p class="text-[11px] text-slate-400">Detect → Fix (Deterministic & AI) → Verify (Feedback Loop)</p>
+          <p class="text-[11px] text-slate-500 font-normal">Automated Accessibility Remediation and Verification Engine</p>
         </div>
       </div>
 
       <!-- Action Navigation Buttons -->
-      <div class="flex items-center flex-wrap gap-1.5">
-        <button id="openUrlModalBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-800/50 transition flex items-center gap-1">
-          <span>🌐</span>
-          <span class="hidden sm:inline">Scan URL</span>
+      <div class="flex items-center flex-wrap gap-2">
+        <button id="openUrlModalBtn" type="button" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+          <span>Scan Live URL</span>
         </button>
-        <button id="openCicdModalBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-violet-300 border border-violet-800/50 transition flex items-center gap-1">
-          <span>🚀</span>
-          <span class="hidden sm:inline">CI/CD Gate</span>
+
+        <button id="openCicdModalBtn" type="button" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span>CI/CD Gate</span>
         </button>
-        <button id="exportCertBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-800/50 transition flex items-center gap-1">
-          <span>📄</span>
-          <span class="hidden sm:inline">Certificate</span>
+
+        <button id="exportCertBtn" type="button" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>Compliance Report</span>
         </button>
-        <button id="stepModeBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1">
-          <span>🎬</span>
-          <span>Pitch Mode</span>
+
+        <button id="stepModeBtn" type="button" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Step-by-Step Mode</span>
         </button>
-        <button id="runPipelineBtn" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-md shadow-indigo-600/30">
-          <span>⚡</span>
-          <span>Run Pipeline</span>
-          <kbd class="hidden md:inline text-[9px] font-mono bg-indigo-800/60 px-1 py-0.5 rounded text-indigo-200">Ctrl+↵</kbd>
+
+        <button id="runPipelineBtn" type="button" class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition flex items-center gap-2 shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span>Run Analysis</span>
+          <kbd class="hidden md:inline text-[10px] font-mono bg-blue-800/80 px-1.5 py-0.5 rounded text-blue-100">Ctrl+Enter</kbd>
         </button>
       </div>
 
     </div>
   </header>
 
+  <!-- HORIZONTAL 3-STAGE WORKFLOW PIPELINE BAR -->
+  <div class="border-b border-slate-200 bg-slate-100/70 px-6 py-3">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        
+        <!-- Step 1: Detect -->
+        <div id="step-col-1" class="flex items-center gap-3 p-2.5 rounded border border-slate-200 bg-white transition shadow-sm">
+          <div id="step-badge-1" class="w-7 h-7 rounded bg-slate-100 text-slate-700 font-mono text-xs font-bold flex items-center justify-center border border-slate-300 flex-shrink-0">
+            01
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-800 tracking-wide uppercase">Stage 1: Detect</span>
+              <span id="step-status-1" class="text-[10px] font-medium text-slate-500 font-mono">Ready</span>
+            </div>
+            <p class="text-[11px] text-slate-500 truncate">axe-core & AST diagnostic rule evaluation</p>
+          </div>
+        </div>
+
+        <!-- Step 2: Remediate -->
+        <div id="step-col-2" class="flex items-center gap-3 p-2.5 rounded border border-slate-200 bg-white transition shadow-sm">
+          <div id="step-badge-2" class="w-7 h-7 rounded bg-slate-100 text-slate-700 font-mono text-xs font-bold flex items-center justify-center border border-slate-300 flex-shrink-0">
+            02
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-800 tracking-wide uppercase">Stage 2: Remediate</span>
+              <span id="step-status-2" class="text-[10px] font-medium text-slate-500 font-mono">Ready</span>
+            </div>
+            <p class="text-[11px] text-slate-500 truncate">Deterministic AST transforms & Contextual LLM</p>
+          </div>
+        </div>
+
+        <!-- Step 3: Verify -->
+        <div id="step-col-3" class="flex items-center gap-3 p-2.5 rounded border border-slate-200 bg-white transition shadow-sm">
+          <div id="step-badge-3" class="w-7 h-7 rounded bg-slate-100 text-slate-700 font-mono text-xs font-bold flex items-center justify-center border border-slate-300 flex-shrink-0">
+            03
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-800 tracking-wide uppercase">Stage 3: Verify</span>
+              <span id="step-status-3" class="text-[10px] font-medium text-slate-500 font-mono">Ready</span>
+            </div>
+            <p class="text-[11px] text-slate-500 truncate">Closed-loop re-scan verification & regression check</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO & TEST BENCH BAR -->
+  <section class="border-b border-slate-200 bg-white px-6 py-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-base font-bold text-slate-900 tracking-tight">Automated Accessibility Remediation and Verification</h2>
+        <p class="text-xs text-slate-600 mt-0.5">
+          Deterministic AST code transformations and contextual semantic repair with automated closed-loop verification for WCAG 2.1 AA compliance.
+        </p>
+      </div>
+
+      <!-- Test Presets Selector -->
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2 flex-shrink-0">
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Test Suites:</span>
+        <div id="presetButtons" class="flex items-center gap-1.5 flex-wrap"></div>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto mt-2">
+      <p id="presetDescription" class="text-[11px] text-slate-500 italic"></p>
+    </div>
+  </section>
+
   <!-- SCREEN READER AUDIO SIMULATOR BAR -->
-  <div class="border-b border-indigo-950/60 bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 px-6 py-2.5">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+  <div class="border-b border-slate-200 bg-white px-6 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
       <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1.5 text-xs font-bold text-indigo-300">
-          <span>🔊</span>
+        <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
           <span>Screen Reader Audio Simulation:</span>
         </div>
+
         <div class="flex items-center gap-2">
-          <button id="playBeforeAudioBtn" class="px-3 py-1 bg-rose-950/70 hover:bg-rose-900 text-rose-300 border border-rose-800/60 rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
-            <span>▶️</span>
-            <span>Listen to BEFORE</span>
+          <button id="playBeforeAudioBtn" type="button" class="px-2.5 py-1 bg-white hover:bg-slate-50 text-rose-700 border border-rose-300 rounded text-xs font-medium flex items-center gap-1.5 transition shadow-sm">
+            <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <span>Listen to Initial HTML</span>
           </button>
-          <button id="playAfterAudioBtn" class="px-3 py-1 bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 border border-emerald-800/60 rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
-            <span>▶️</span>
-            <span>Listen to AFTER</span>
+          <button id="playAfterAudioBtn" type="button" class="px-2.5 py-1 bg-white hover:bg-slate-50 text-emerald-700 border border-emerald-300 rounded text-xs font-medium flex items-center gap-1.5 transition shadow-sm">
+            <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <span>Listen to Remediated HTML</span>
           </button>
-          <button id="stopAudioBtn" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg text-xs transition">
-            ⏹️ Stop
+          <button id="stopAudioBtn" type="button" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-600 border border-slate-300 rounded text-xs font-medium transition shadow-sm flex items-center gap-1">
+            <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="6" y="6" width="12" height="12" rx="1"/>
+            </svg>
+            <span>Stop</span>
           </button>
         </div>
       </div>
 
       <!-- Live Speech Transcript Ticker -->
-      <div class="flex-1 max-w-lg flex items-center gap-2 bg-slate-950/60 px-3 py-1 rounded-lg border border-slate-800">
-        <div id="audioWaveform" class="hidden items-center gap-0.5 h-4">
-          <span class="w-1 bg-indigo-400 rounded-full audio-bar-1"></span>
-          <span class="w-1 bg-indigo-400 rounded-full audio-bar-2"></span>
-          <span class="w-1 bg-indigo-400 rounded-full audio-bar-3"></span>
-          <span class="w-1 bg-indigo-400 rounded-full audio-bar-4"></span>
-        </div>
-        <span class="text-[11px] text-slate-500 font-mono">Narrating:</span>
-        <span id="speechTicker" class="text-[11px] text-indigo-200 truncate italic">Ready to simulate speech stream.</span>
+      <div class="flex-1 max-w-xl flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded border border-slate-200">
+        <span id="audioActiveIndicator" class="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0 transition-colors"></span>
+        <span class="text-[11px] font-semibold text-slate-500 font-mono flex-shrink-0">Transcript:</span>
+        <span id="speechTicker" class="text-[11px] text-slate-700 font-mono truncate">Ready to simulate speech stream.</span>
       </div>
+
     </div>
   </div>
 
-  <!-- SUBHEADER: PRESETS & CONTEXT -->
-  <div class="border-b border-slate-800/80 bg-slate-900/40 px-6 py-2.5">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Presets:</span>
-        <div id="presetButtons" class="flex items-center gap-1.5"></div>
+  <!-- ANALYTICAL SCORECARD SECTION -->
+  <section class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+    <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
+      
+      <!-- Metric 1: Compliance Pass Rate -->
+      <div class="p-3.5 rounded border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 text-[11px] font-medium uppercase tracking-wider">
+          <span>Compliance Pass Rate</span>
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-2">
+          <span id="scorePassRate" class="text-2xl font-bold font-mono text-slate-900">—</span>
+          <span id="scorePassRateDelta" class="text-xs font-mono font-medium text-slate-500">Awaiting run</span>
+        </div>
+        <div class="mt-2 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div id="scorePassRateBar" class="bg-blue-600 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
       </div>
-      <div id="presetDescription" class="text-xs text-slate-400 italic"></div>
+
+      <!-- Metric 2: Initial Violations -->
+      <div class="p-3.5 rounded border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 text-[11px] font-medium uppercase tracking-wider">
+          <span>Violations Detected</span>
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-2">
+          <span id="scoreInitialCount" class="text-2xl font-bold font-mono text-slate-900">—</span>
+          <span id="scoreCriticalLabel" class="text-xs font-mono text-rose-600 font-medium">Critical</span>
+        </div>
+        <div class="mt-2 text-[11px] text-slate-500">
+          Evaluated against WCAG 2.1 AA rules
+        </div>
+      </div>
+
+      <!-- Metric 3: Remediated Fixes -->
+      <div class="p-3.5 rounded border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 text-[11px] font-medium uppercase tracking-wider">
+          <span>Verified Fixes</span>
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-2">
+          <span id="scoreResolvedCount" class="text-2xl font-bold font-mono text-slate-900">—</span>
+          <span id="scoreEngineBreakdown" class="text-xs font-mono text-blue-700 font-medium">Deterministic + AI</span>
+        </div>
+        <div class="mt-2 text-[11px] text-slate-500">
+          AST and contextual repair applied
+        </div>
+      </div>
+
+      <!-- Metric 4: Residual Defects -->
+      <div class="p-3.5 rounded border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 text-[11px] font-medium uppercase tracking-wider">
+          <span>Residual Defects</span>
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-2">
+          <span id="scoreRemainingCount" class="text-2xl font-bold font-mono text-slate-900">—</span>
+          <span id="scoreAuditStatus" class="text-xs font-mono text-slate-500 font-medium">Pending Scan</span>
+        </div>
+        <div class="mt-2 text-[11px] text-slate-500">
+          Closed feedback loop confirmation
+        </div>
+      </div>
+
     </div>
-  </div>
+  </section>
 
   <!-- MAIN 3-STAGE WORKSPACE -->
   <main class="flex-1 max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- COLUMN 1: STAGE 1 — DETECT (4 cols) -->
+    <!-- COLUMN 1: STAGE 1 — SOURCE HTML (4 cols) -->
     <section class="lg:col-span-4 flex flex-col gap-4">
-      <div class="flex items-center justify-between pb-1 border-b border-slate-800">
+      
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
         <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-          <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Stage 1: Detect</h2>
+          <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Source HTML Document</h3>
         </div>
-        <span id="detectCountBadge" class="text-xs px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700">0</span>
+        <span class="text-[11px] font-mono text-slate-500 font-medium">Editable Snippet</span>
       </div>
 
       <!-- Code Input Area -->
-      <div class="flex flex-col bg-slate-900/90 rounded-xl border border-slate-800 overflow-hidden shadow-sm">
-        <div class="px-3 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
-          <span>source-input.html</span>
-          <span class="text-[10px] text-slate-500">Editable (Paste ANY HTML)</span>
+      <div class="flex flex-col bg-white rounded border border-slate-200 overflow-hidden shadow-sm">
+        <div class="px-3.5 py-2 bg-slate-100/80 border-b border-slate-200 flex items-center justify-between text-xs text-slate-600 font-mono">
+          <span class="font-medium text-slate-700">source-document.html</span>
+          <span id="charCount" class="text-[11px] text-slate-500 font-mono">0 chars</span>
         </div>
-        <textarea id="htmlEditor" rows="7" spellcheck="false" class="w-full bg-slate-950 p-3.5 font-mono text-xs text-slate-200 leading-relaxed focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y border-none" placeholder="Paste HTML code to analyze..."></textarea>
+        <textarea id="htmlEditor" rows="10" spellcheck="false" class="w-full bg-white p-3.5 font-mono text-xs text-slate-900 leading-relaxed focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y border-none" placeholder="Paste HTML code to analyze..."></textarea>
       </div>
 
-      <!-- Detected Violations List -->
-      <div class="flex-1 flex flex-col bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
-        <div class="px-3.5 py-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-300">axe-core Diagnostics</span>
-          <span class="text-[10px] text-slate-500">Diagnostic Scanner</span>
+      <!-- Engine Architecture Summary Card -->
+      <div class="p-3 rounded border border-slate-200 bg-white shadow-sm space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+          <span>Engine Architecture</span>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-300 font-semibold">DUAL-PASS</span>
         </div>
-        <div id="violationsList" class="p-3.5 flex-1 overflow-y-auto max-h-[380px]">
-          <div class="text-xs text-slate-500 italic p-4 text-center">Click "Run Pipeline" to detect accessibility violations.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- COLUMN 2: STAGE 2 — FIX (HYBRID ENGINE) (4 cols) -->
-    <section class="lg:col-span-4 flex flex-col gap-4">
-      <div class="flex items-center justify-between pb-1 border-b border-slate-800">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-          <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Stage 2: Hybrid Remediation</h2>
-        </div>
-        <span id="remediateCountBadge" class="text-xs px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700">0</span>
-      </div>
-
-      <!-- Hybrid Engine Philosophy Card -->
-      <div class="p-3 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/40 border border-indigo-900/40">
-        <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-300 mb-1">
-          <span>⚙️ Deterministic vs. 🧠 AI Philosophy</span>
-        </div>
-        <p class="text-[11px] text-slate-400 leading-relaxed">
-          <strong>Deterministic Math:</strong> Contrast luminance & heading outline tree.<br>
-          <strong>Contextual AI / LLM:</strong> Semantic alt text synthesis with transparency reasoning.
+        <p class="text-xs text-slate-600 leading-relaxed">
+          <strong>Deterministic Math:</strong> Contrast luminance calculation (WCAG 1.4.3) and heading outline hierarchy (WCAG 1.3.1).<br>
+          <strong>Contextual AI Model:</strong> Semantic alt-text synthesis and contextual naming.
         </p>
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-mono">
+          <span>Closed Verification Loop</span>
+          <span class="text-emerald-700 font-semibold">Active</span>
+        </div>
       </div>
 
-      <!-- Generated Fixes List -->
-      <div class="flex-1 flex flex-col bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
-        <div class="px-3.5 py-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-300">AST Transformations & Patches</span>
-          <span class="text-[10px] text-slate-500">Click AI cards for reasoning</span>
-        </div>
-        <div id="remediationList" class="p-3.5 flex-1 overflow-y-auto max-h-[460px]">
-          <div class="text-xs text-slate-500 italic p-4 text-center">Remediation steps will appear here.</div>
-        </div>
-      </div>
     </section>
 
-    <!-- COLUMN 3: STAGE 3 — VERIFY & OUTPUT (4 cols) -->
+    <!-- COLUMN 2: STAGE 2 — DETECTED ISSUES & FIXES (4 cols) -->
     <section class="lg:col-span-4 flex flex-col gap-4">
-      <div class="flex items-center justify-between pb-1 border-b border-slate-800">
+      
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
         <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-          <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Stage 3: Verification Loop</h2>
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Detected Violations & Fixes</h3>
         </div>
-        <span id="verifyCountBadge" class="text-xs px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700">0</span>
+        <span id="detectCountBadge" class="text-xs px-2 py-0.5 rounded font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-300">0</span>
       </div>
 
-      <!-- Verification Results Container -->
-      <div id="verificationList">
-        <div class="text-xs text-slate-500 italic p-4 text-center bg-slate-900/60 rounded-xl border border-slate-800">
-          Verification status will appear here.
+      <!-- Structured Data Table Container -->
+      <div class="flex-1 flex flex-col bg-white rounded border border-slate-200 overflow-hidden shadow-sm">
+        <div class="px-3.5 py-2 bg-slate-100/80 border-b border-slate-200 flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-800">Diagnostic Rule Findings</span>
+          <span class="text-[11px] text-slate-500 font-mono">axe-core 4.8</span>
         </div>
-      </div>
-
-      <!-- Output Tabs: Diff, Code, Preview, AOM Tree -->
-      <div class="flex-1 flex flex-col bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
         
-        <!-- Tab Navigation -->
-        <div class="flex items-center justify-between px-3 bg-slate-900/90 border-b border-slate-800">
-          <div class="flex items-center gap-1">
-            <button id="tab-diff" class="active-tab px-2.5 py-2 text-xs font-semibold border-b-2 border-indigo-500 text-indigo-400 transition">
-              Diff
+        <!-- Table container -->
+        <div id="violationsTableContainer" class="flex-1 overflow-y-auto max-h-[290px]">
+          <div class="text-xs text-slate-500 italic p-6 text-center">Click "Run Analysis" to inspect accessibility violations.</div>
+        </div>
+      </div>
+
+      <!-- Selected Issue Details Inspector Drawer -->
+      <div id="issueInspectorCard" class="bg-white rounded border border-slate-200 p-3.5 shadow-sm space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Violation Technical Inspector</span>
+          <span id="inspectorRuleId" class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-300">Select an issue</span>
+        </div>
+        <div id="inspectorContent" class="text-xs text-slate-500 italic">
+          Click any row in the findings table above to inspect the exact offending DOM node, WCAG success criterion, and applied patch.
+        </div>
+      </div>
+
+    </section>
+
+    <!-- COLUMN 3: STAGE 3 — VERIFICATION & OUTPUT (4 cols) -->
+    <section class="lg:col-span-4 flex flex-col gap-4">
+      
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Verification & Output</h3>
+        </div>
+        <span id="verifyCountBadge" class="text-xs px-2 py-0.5 rounded font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-300">0</span>
+      </div>
+
+      <!-- Verification Status Banner -->
+      <div id="verificationBanner" class="p-3 rounded border border-slate-200 bg-white shadow-sm space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-800">Verification Loop Status</span>
+          <span id="verificationStatusBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-300">Pending</span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div id="verificationProgressBar" class="bg-emerald-600 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <div id="verificationDetailsText" class="text-[11px] text-slate-600">
+          Run the analysis pipeline to execute the second-pass automated verification scan.
+        </div>
+      </div>
+
+      <!-- Output Inspection Tabs: Diff, Code, Preview, AOM Tree -->
+      <div class="flex-1 flex flex-col bg-white rounded border border-slate-200 overflow-hidden shadow-sm">
+        
+        <!-- Tab Navigation Bar -->
+        <div class="flex items-center justify-between px-2 bg-slate-100/80 border-b border-slate-200">
+          <div class="flex items-center">
+            <button id="tab-diff" type="button" class="active-tab px-3 py-2 text-xs font-semibold border-b-2 border-blue-600 text-blue-700 bg-white transition">
+              Line Diff
             </button>
-            <button id="tab-preview" class="px-2.5 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
-              Preview
+            <button id="tab-code" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition">
+              Verified Code
             </button>
-            <button id="tab-aom" class="px-2.5 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
+            <button id="tab-preview" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition">
+              Visual Preview
+            </button>
+            <button id="tab-aom" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition">
               AOM Tree
             </button>
-            <button id="tab-code" class="px-2.5 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
-              Code
-            </button>
           </div>
-          <div class="flex items-center gap-1">
-            <button id="copyCodeBtn" title="Copy code" class="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 text-xs flex items-center gap-1">
-              <span>📋 Copy</span>
+          <div class="flex items-center pr-1">
+            <button id="copyCodeBtn" type="button" title="Copy remediated code" class="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-200 text-xs flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span>Copy</span>
             </button>
           </div>
         </div>
 
-        <!-- Tab 1: Diff View -->
-        <div id="view-diff" class="p-3.5 flex-1 overflow-y-auto max-h-[300px]">
-          <div id="diffView" class="text-xs text-slate-500 italic p-4 text-center">Run pipeline to inspect line-by-line diff.</div>
+        <!-- Tab 1: Line Diff View -->
+        <div id="view-diff" class="p-3.5 flex-1 overflow-y-auto max-h-[320px]">
+          <div id="diffView" class="text-xs text-slate-500 italic p-6 text-center">Run analysis to inspect line-by-line diff.</div>
         </div>
 
-        <!-- Tab 2: Clean Code View -->
-        <div id="view-code" class="hidden p-3.5 flex-1 overflow-y-auto max-h-[300px]">
-          <pre id="remediatedCode" class="font-mono text-xs text-emerald-300 whitespace-pre-wrap leading-relaxed bg-slate-950 p-3 rounded-lg border border-slate-800"></pre>
+        <!-- Tab 2: Remediated HTML Code View -->
+        <div id="view-code" class="hidden p-3 flex-1 overflow-y-auto max-h-[320px]">
+          <pre id="remediatedCode" class="font-mono text-xs text-slate-800 whitespace-pre-wrap leading-relaxed bg-slate-50 p-3 rounded border border-slate-200 select-all"></pre>
         </div>
 
         <!-- Tab 3: Live Preview & Vision Simulator -->
         <div id="view-preview" class="hidden p-3 flex-1 flex flex-col gap-2 overflow-hidden h-[340px]">
-          <!-- Vision Impairment Selector -->
-          <div class="flex items-center justify-between bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-800 text-xs">
-            <span class="text-[11px] font-bold text-slate-400 flex items-center gap-1">
-              <span>👁️ Vision Simulator:</span>
-            </span>
-            <select id="visionFilterSelect" class="bg-slate-900 text-slate-200 border border-slate-700 text-[11px] rounded px-2 py-0.5 focus:outline-none">
+          <div class="flex items-center justify-between bg-slate-50 px-2.5 py-1.5 rounded border border-slate-200 text-xs">
+            <label for="visionFilterSelect" class="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <span>Vision Impairment Simulator:</span>
+            </label>
+            <select id="visionFilterSelect" class="bg-white text-slate-800 border border-slate-300 text-[11px] rounded px-2 py-0.5 focus:outline-none focus:border-blue-500">
               <option value="normal">Normal Vision</option>
               <option value="protanopia">Protanopia (Red-Blind)</option>
               <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
@@ -272,82 +463,90 @@
             </select>
           </div>
           <!-- Live Preview Iframe Container -->
-          <div class="flex-1 relative rounded-lg overflow-hidden border border-slate-700 bg-white">
-            <iframe id="renderedPreview" class="w-full h-full border-none"></iframe>
+          <div class="flex-1 relative rounded border border-slate-300 bg-white overflow-hidden">
+            <iframe id="renderedPreview" class="w-full h-full border-none" title="Live remediated HTML preview"></iframe>
           </div>
         </div>
 
         <!-- Tab 4: Accessible Object Model (AOM) Tree -->
-        <div id="view-aom" class="hidden p-3.5 flex-1 overflow-y-auto max-h-[300px]">
+        <div id="view-aom" class="hidden p-3.5 flex-1 overflow-y-auto max-h-[320px]">
           <div id="aomTreeContainer">
-            <div class="text-xs text-slate-500 italic p-4 text-center">Run pipeline to inspect Accessibility Tree hierarchy.</div>
+            <div class="text-xs text-slate-500 italic p-6 text-center">Run analysis to inspect Accessibility Tree hierarchy.</div>
           </div>
         </div>
 
       </div>
+
     </section>
 
   </main>
 
   <!-- LIVE URL SCANNER MODAL -->
-  <div id="urlModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2 text-cyan-300 font-bold text-sm">
-          <span>🌐</span>
+  <div id="urlModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="urlModalTitle">
+    <div class="bg-white border border-slate-200 rounded-lg max-w-lg w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2 text-slate-900 font-bold text-sm" id="urlModalTitle">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
           <span>Scan Live Website URL</span>
         </div>
-        <button id="closeUrlModalBtn" class="text-slate-400 hover:text-white text-base">✕</button>
+        <button id="closeUrlModalBtn" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold">Close</button>
       </div>
-      <p class="text-xs text-slate-400 leading-relaxed">
-        Enter any public web address. Our backend proxy will fetch the HTML, sanitize assets, and feed it into the <strong>Detect → Fix → Verify</strong> pipeline.
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Provide a publicly accessible URL. The proxy service retrieves the remote document, extracts the DOM hierarchy, and runs the <strong>Detect &rarr; Fix &rarr; Verify</strong> remediation pipeline.
       </p>
       <div>
-        <label class="block text-xs font-mono text-slate-400 mb-1">Target Website URL:</label>
-        <input id="targetUrlInput" type="url" placeholder="https://example.com" value="https://example.com" class="w-full bg-slate-950 px-3.5 py-2 rounded-lg border border-slate-800 font-mono text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500">
+        <label for="targetUrlInput" class="block text-xs font-mono text-slate-700 mb-1 font-semibold">Target Website URL:</label>
+        <input id="targetUrlInput" type="url" placeholder="https://example.com" value="https://example.com" class="w-full bg-slate-50 px-3.5 py-2 rounded border border-slate-300 font-mono text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500">
       </div>
       <div>
-        <span class="text-[11px] text-slate-500 block mb-1.5">Quick Examples:</span>
+        <span class="text-[11px] text-slate-500 block mb-1.5 font-medium">Quick Benchmarks:</span>
         <div class="flex flex-wrap gap-1.5">
-          <button onclick="setUrlPreset('https://example.com')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 rounded border border-slate-700">example.com</button>
-          <button onclick="setUrlPreset('https://news.ycombinator.com')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 rounded border border-slate-700">Hacker News</button>
-          <button onclick="setUrlPreset('https://wikipedia.org')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 rounded border border-slate-700">Wikipedia</button>
+          <button type="button" onclick="setUrlPreset('https://example.com')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-[11px] text-slate-700 rounded border border-slate-300">example.com</button>
+          <button type="button" onclick="setUrlPreset('https://news.ycombinator.com')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-[11px] text-slate-700 rounded border border-slate-300">Hacker News</button>
+          <button type="button" onclick="setUrlPreset('https://wikipedia.org')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-[11px] text-slate-700 rounded border border-slate-300">Wikipedia</button>
         </div>
       </div>
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-        <button id="cancelUrlBtn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg">Cancel</button>
-        <button id="fetchUrlBtn" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-lg shadow flex items-center gap-1.5">
-          <span>Fetch & Auto-Remediate</span>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+        <button id="cancelUrlBtn" type="button" class="px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded border border-slate-300 shadow-sm">Cancel</button>
+        <button id="fetchUrlBtn" type="button" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded shadow-sm flex items-center gap-1.5">
+          <span>Fetch and Analyze</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- CI/CD INTEGRATION & GITHUB ACTION MODAL -->
-  <div id="cicdModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2 text-violet-400 font-bold text-sm">
-          <span>🚀</span>
-          <span>CI/CD Developer Integration Hub</span>
+  <!-- CI/CD INTEGRATION HUB MODAL -->
+  <div id="cicdModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="cicdModalTitle">
+    <div class="bg-white border border-slate-200 rounded-lg max-w-2xl w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2 text-slate-900 font-bold text-sm" id="cicdModalTitle">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span>CI/CD Integration Hub</span>
         </div>
-        <button id="closeCicdModalBtn" class="text-slate-400 hover:text-white text-base">✕</button>
+        <button id="closeCicdModalBtn" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold">Close</button>
       </div>
-      <p class="text-xs text-slate-400 leading-relaxed">
-        Integrate automated accessibility remediation directly into developer repositories, pull requests, and automated deployment pipelines.
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Embed automated accessibility remediation directly into pull request checks, GitHub Actions, and deployment verification gates.
       </p>
       <div>
         <div class="flex justify-between items-center mb-1">
-          <label class="text-xs font-mono text-slate-400">.github/workflows/a11y-verify.yml</label>
-          <button id="copyYmlBtn" class="text-[11px] text-violet-300 hover:text-white font-mono">📋 Copy YAML</button>
+          <label class="text-xs font-mono text-slate-600 font-semibold">.github/workflows/a11y-verify.yml</label>
+          <button id="copyYmlBtn" type="button" class="text-[11px] text-blue-700 hover:text-blue-900 font-mono font-medium">Copy YAML</button>
         </div>
-        <pre id="cicdYmlContent" class="bg-slate-950 p-3 rounded-lg border border-slate-800 font-mono text-xs text-violet-200 overflow-x-auto max-h-[220px]"></pre>
+        <pre id="cicdYmlContent" class="bg-slate-50 p-3 rounded border border-slate-300 font-mono text-xs text-slate-800 overflow-x-auto max-h-[220px]"></pre>
       </div>
-      <div class="flex justify-between items-center pt-2 border-t border-slate-800">
-        <button id="downloadPatchBtn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-lg flex items-center gap-1.5">
-          <span>💾 Download .patch File</span>
+      <div class="flex justify-between items-center pt-3 border-t border-slate-200">
+        <button id="downloadPatchBtn" type="button" class="px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded border border-slate-300 shadow-sm flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span>Download .patch File</span>
         </button>
-        <button onclick="document.getElementById('cicdModal').classList.add('hidden')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg">
+        <button type="button" onclick="document.getElementById('cicdModal').classList.add('hidden')" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded shadow-sm">
           Done
         </button>
       </div>
@@ -355,42 +554,66 @@
   </div>
 
   <!-- AI REASONING & TRANSPARENCY MODAL -->
-  <div id="aiModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2 text-purple-400 font-bold text-sm">
-          <span>🧠</span>
+  <div id="aiModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle">
+    <div class="bg-white border border-slate-200 rounded-lg max-w-lg w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2 text-slate-900 font-bold text-sm" id="aiModalTitle">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
           <span>AI Reasoning & Contextual Inspection</span>
         </div>
-        <button id="closeAiModalBtn" class="text-slate-400 hover:text-white text-base">✕</button>
+        <button id="closeAiModalBtn" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold">Close</button>
       </div>
       <div id="aiModalContent" class="space-y-3"></div>
     </div>
   </div>
 
   <!-- CERTIFICATE AUDIT MODAL -->
-  <div id="certModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full p-6 shadow-2xl my-8">
-      <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
-        <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-          <span>📄</span>
+  <div id="certModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="certModalTitle">
+    <div class="bg-white border border-slate-200 rounded-lg max-w-4xl w-full p-6 shadow-xl my-8">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-200 mb-4">
+        <div class="flex items-center gap-2 text-slate-900 font-bold text-sm" id="certModalTitle">
+          <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
           <span>WCAG 2.1 AA Compliance Audit Certificate</span>
         </div>
-        <button id="closeCertModalBtn" class="text-slate-400 hover:text-white text-base">✕</button>
+        <button id="closeCertModalBtn" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold">Close</button>
       </div>
       <div id="certContentContainer"></div>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="border-t border-slate-800/80 bg-slate-900/50 py-3 px-6 text-center text-xs text-slate-500">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-      <div>
-        <span>A11y Remediation Engine Enterprise</span> &bull; 
-        <span class="text-slate-400">Detect &rarr; Fix &rarr; Verify</span>
+  <!-- SYSTEM STATUS INDICATOR BAR -->
+  <aside class="border-t border-slate-200 bg-slate-100 px-6 py-2 text-xs font-mono text-slate-600" aria-label="System telemetry">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>Engine Status: Online</span>
+        </span>
+        <span class="text-slate-300">|</span>
+        <span>Target Standard: WCAG 2.1 Level AA</span>
+        <span class="text-slate-300">|</span>
+        <span>Verification Gate: Active (Closed Feedback Loop)</span>
       </div>
-      <div class="text-slate-400 font-mono text-[11px]">
-        Accessible Object Model &bull; Vision Simulator &bull; CI/CD Gate
+      <div class="flex items-center gap-3 text-slate-500 text-[11px]">
+        <span id="systemExecutionTime">Execution: 0ms</span>
+        <span>AST Parser: HTML5 Standard</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- FORMAL ENTERPRISE FOOTER -->
+  <footer class="border-t border-slate-200 bg-white py-4 px-6 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div>
+        <span class="font-semibold text-slate-700">A11y Remediation Engine Enterprise</span> &bull; 
+        <span>W3C WAI WCAG 2.1 Level AA Reference Implementation</span>
+      </div>
+      <div class="text-[11px] text-slate-500 font-mono">
+        AST Manipulation &bull; Contextual AI Reasoning &bull; Automated Regression Verification
       </div>
     </div>
   </footer>

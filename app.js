@@ -1,9 +1,11 @@
-﻿/**
+/**
  * A11y Remediation Engine — High-Level Enterprise Platform Controller
  * Integrates:
  * - 3-Stage Pipeline (Detect -> Fix -> Verify)
- * - Accessible Object Model (AOM) Tree Inspector
- * - Real-Time Vision Impairment & Color Blindness Simulator
+ * - Structured Diagnostics Table & Detail Inspector
+ * - Analytical Scorecard & Conformance Metrics
+ * - Accessible Object Model (AOM) Tree Comparison
+ * - Vision Impairment & Color Blindness Simulator
  * - AI Reasoning & Transparency Inspector with Alternative Switcher
  * - CI/CD GitHub Action & Git Patch Exporter
  * - Screen Reader Audio Simulator (Web Speech API)
@@ -14,8 +16,8 @@
 // Presets
 const PRESETS = {
   script: {
-    name: "Pitch Script Example",
-    description: "The presentation script snippet: skipped heading (h1 -> h4), shoe.jpg without alt, unlabelled input.",
+    name: "Presentation Sample",
+    description: "Pitch benchmark snippet: skipped heading (h1 -> h4), shoe.jpg without alt, unlabelled input.",
     html: `<h1>Products</h1>
 
 <h4>Shoes</h4>
@@ -57,6 +59,7 @@ const PRESETS = {
 let currentViolations = [];
 let currentRemediation = null;
 let currentVerification = null;
+let selectedViolationIndex = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
   setupPresetButtons();
@@ -69,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupCicdModal();
   setupAiModal();
   setupKeyboardShortcuts();
+  setupEditorListener();
   loadPreset('script');
 });
 
@@ -78,16 +82,22 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupPresetButtons() {
   const container = document.getElementById('presetButtons');
   if (!container) return;
+  container.innerHTML = '';
 
   Object.entries(PRESETS).forEach(([key, preset]) => {
     const btn = document.createElement('button');
-    btn.className = `preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition ${key === 'script' ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200 shadow-sm' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'}`;
-    btn.innerHTML = `<span class="mr-1">●</span>${preset.name}`;
+    btn.type = 'button';
+    btn.className = `preset-btn px-2.5 py-1 text-xs font-medium rounded border transition ${
+      key === 'script' 
+        ? 'bg-blue-50 border-blue-300 text-blue-700 font-semibold shadow-sm' 
+        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+    }`;
+    btn.textContent = preset.name;
     btn.onclick = () => {
       document.querySelectorAll('.preset-btn').forEach(b => {
-        b.className = 'preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700';
+        b.className = 'preset-btn px-2.5 py-1 text-xs font-medium rounded border transition bg-white border-slate-200 text-slate-600 hover:bg-slate-50';
       });
-      btn.className = 'preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition bg-indigo-600/30 border-indigo-500 text-indigo-200 shadow-sm';
+      btn.className = 'preset-btn px-2.5 py-1 text-xs font-medium rounded border transition bg-blue-50 border-blue-300 text-blue-700 font-semibold shadow-sm';
       loadPreset(key);
     };
     container.appendChild(btn);
@@ -98,7 +108,10 @@ function loadPreset(key) {
   const preset = PRESETS[key];
   if (!preset) return;
   const editor = document.getElementById('htmlEditor');
-  if (editor) editor.value = preset.html;
+  if (editor) {
+    editor.value = preset.html;
+    updateCharCount(preset.html.length);
+  }
 
   const descEl = document.getElementById('presetDescription');
   if (descEl) descEl.textContent = preset.description;
@@ -106,35 +119,91 @@ function loadPreset(key) {
   resetPipelineUI();
 }
 
+function setupEditorListener() {
+  const editor = document.getElementById('htmlEditor');
+  if (editor) {
+    editor.addEventListener('input', (e) => {
+      updateCharCount(e.target.value.length);
+    });
+  }
+}
+
+function updateCharCount(len) {
+  const charEl = document.getElementById('charCount');
+  if (charEl) charEl.textContent = `${len} chars`;
+}
+
 function resetPipelineUI() {
   currentViolations = [];
   currentRemediation = null;
   currentVerification = null;
+  selectedViolationIndex = 0;
 
-  document.getElementById('violationsList').innerHTML = '<div class="text-xs text-slate-500 italic p-4 text-center">Click "Run Pipeline" to detect accessibility violations.</div>';
-  document.getElementById('remediationList').innerHTML = '<div class="text-xs text-slate-500 italic p-4 text-center">Remediation steps will appear here.</div>';
-  document.getElementById('verificationList').innerHTML = '<div class="text-xs text-slate-500 italic p-4 text-center">Verification status will appear here.</div>';
-  
-  document.getElementById('diffView').innerHTML = '<div class="text-xs text-slate-500 italic p-6 text-center">Run pipeline to inspect line-by-line diff.</div>';
+  const tableContainer = document.getElementById('violationsTableContainer');
+  if (tableContainer) {
+    tableContainer.innerHTML = '<div class="text-xs text-slate-500 italic p-6 text-center">Click "Run Analysis" to inspect accessibility violations.</div>';
+  }
+
+  const inspectorRuleId = document.getElementById('inspectorRuleId');
+  if (inspectorRuleId) {
+    inspectorRuleId.textContent = 'Select an issue';
+    inspectorRuleId.className = 'text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-300';
+  }
+
+  const inspectorContent = document.getElementById('inspectorContent');
+  if (inspectorContent) {
+    inspectorContent.innerHTML = 'Click any row in the findings table above to inspect the exact offending DOM node, WCAG success criterion, and applied patch.';
+  }
+
+  const verificationBanner = document.getElementById('verificationStatusBadge');
+  if (verificationBanner) {
+    verificationBanner.textContent = 'Pending';
+    verificationBanner.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-300';
+  }
+
+  const progressBar = document.getElementById('verificationProgressBar');
+  if (progressBar) progressBar.style.width = '0%';
+
+  const detailsText = document.getElementById('verificationDetailsText');
+  if (detailsText) detailsText.textContent = 'Run the analysis pipeline to execute the second-pass automated verification scan.';
+
+  document.getElementById('diffView').innerHTML = '<div class="text-xs text-slate-500 italic p-6 text-center">Run analysis to inspect line-by-line diff.</div>';
   document.getElementById('remediatedCode').textContent = '';
   document.getElementById('renderedPreview').srcdoc = '';
-  document.getElementById('aomTreeContainer').innerHTML = '<div class="text-xs text-slate-500 italic p-4 text-center">Run pipeline to inspect Accessibility Tree hierarchy.</div>';
+  document.getElementById('aomTreeContainer').innerHTML = '<div class="text-xs text-slate-500 italic p-6 text-center">Run analysis to inspect Accessibility Tree hierarchy.</div>';
 
   updateBadge('detectCountBadge', 0, 'slate');
-  updateBadge('remediateCountBadge', 0, 'slate');
   updateBadge('verifyCountBadge', 0, 'slate');
+  resetScorecard();
   setPipelineStep(0);
   stopAudioNarration();
 }
 
-function updateBadge(id, count, color = 'indigo') {
+function resetScorecard() {
+  document.getElementById('scorePassRate').textContent = '—';
+  document.getElementById('scorePassRateDelta').textContent = 'Awaiting run';
+  document.getElementById('scorePassRateBar').style.width = '0%';
+
+  document.getElementById('scoreInitialCount').textContent = '—';
+  document.getElementById('scoreResolvedCount').textContent = '—';
+  document.getElementById('scoreRemainingCount').textContent = '—';
+  document.getElementById('scoreAuditStatus').textContent = 'Pending Scan';
+}
+
+function updateBadge(id, count, color = 'blue') {
   const el = document.getElementById(id);
   if (!el) return;
   el.textContent = count;
   if (count > 0 || (typeof count === 'string' && count.includes('/'))) {
-    el.className = `text-xs px-2 py-0.5 rounded-full font-bold ${color === 'emerald' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : color === 'rose' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'}`;
+    if (color === 'emerald') {
+      el.className = 'text-xs px-2 py-0.5 rounded font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-300';
+    } else if (color === 'rose') {
+      el.className = 'text-xs px-2 py-0.5 rounded font-mono font-semibold bg-rose-50 text-rose-700 border border-rose-300';
+    } else {
+      el.className = 'text-xs px-2 py-0.5 rounded font-mono font-semibold bg-blue-50 text-blue-700 border border-blue-300';
+    }
   } else {
-    el.className = 'text-xs px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400 border border-slate-700';
+    el.className = 'text-xs px-2 py-0.5 rounded font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-300';
   }
 }
 
@@ -145,35 +214,59 @@ function setupActionButtons() {
 }
 
 function setupViewTabs() {
-  const tabs = ['diff', 'preview', 'aom', 'code'];
+  const tabs = ['diff', 'code', 'preview', 'aom'];
   tabs.forEach(tab => {
     const tabBtn = document.getElementById(`tab-${tab}`);
     if (!tabBtn) return;
     tabBtn.addEventListener('click', () => {
       tabs.forEach(t => {
-        document.getElementById(`tab-${t}`)?.classList.remove('active-tab', 'border-indigo-500', 'text-indigo-400');
-        document.getElementById(`tab-${t}`)?.classList.add('text-slate-400', 'border-transparent');
+        const btn = document.getElementById(`tab-${t}`);
+        if (btn) {
+          btn.classList.remove('active-tab', 'border-blue-600', 'text-blue-700', 'bg-white', 'font-semibold');
+          btn.classList.add('text-slate-600', 'border-transparent', 'font-medium');
+        }
         document.getElementById(`view-${t}`)?.classList.add('hidden');
       });
-      tabBtn.classList.add('active-tab', 'border-indigo-500', 'text-indigo-400');
-      tabBtn.classList.remove('text-slate-400', 'border-transparent');
+      tabBtn.classList.add('active-tab', 'border-blue-600', 'text-blue-700', 'bg-white', 'font-semibold');
+      tabBtn.classList.remove('text-slate-600', 'border-transparent', 'font-medium');
       document.getElementById(`view-${tab}`)?.classList.remove('hidden');
     });
   });
 }
 
 function setPipelineStep(step) {
-  for (let i = 1; i <= 3; i++) {
-    const el = document.getElementById(`step-indicator-${i}`);
-    if (!el) continue;
-    if (i < step) {
-      el.className = 'flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold bg-emerald-950/60 border border-emerald-600/50 text-emerald-300 shadow-sm';
-    } else if (i === step) {
-      el.className = 'flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold bg-indigo-900/60 border border-indigo-500 text-indigo-200 animate-pulse shadow-sm';
+  const steps = [
+    { num: 1, name: 'Detect', activeText: 'Analyzing...', doneText: 'Completed' },
+    { num: 2, name: 'Remediate', activeText: 'Transforming...', doneText: 'Completed' },
+    { num: 3, name: 'Verify', activeText: 'Verifying...', doneText: 'Completed' }
+  ];
+
+  steps.forEach(s => {
+    const col = document.getElementById(`step-col-${s.num}`);
+    const badge = document.getElementById(`step-badge-${s.num}`);
+    const status = document.getElementById(`step-status-${s.num}`);
+    if (!col || !badge || !status) return;
+
+    if (s.num < step) {
+      // Completed step
+      col.className = 'flex items-center gap-3 p-2.5 rounded border border-emerald-200 bg-emerald-50/40 transition shadow-sm';
+      badge.className = 'w-7 h-7 rounded bg-emerald-600 text-white font-mono text-xs font-bold flex items-center justify-center flex-shrink-0';
+      status.textContent = s.doneText;
+      status.className = 'text-[10px] font-semibold text-emerald-700 font-mono';
+    } else if (s.num === step) {
+      // Currently active step
+      col.className = 'flex items-center gap-3 p-2.5 rounded border border-blue-300 bg-blue-50/50 transition shadow-sm';
+      badge.className = 'w-7 h-7 rounded bg-blue-600 text-white font-mono text-xs font-bold flex items-center justify-center flex-shrink-0';
+      status.textContent = s.activeText;
+      status.className = 'text-[10px] font-semibold text-blue-700 font-mono';
     } else {
-      el.className = 'flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-900/40 border border-slate-800 text-slate-500';
+      // Pending step
+      col.className = 'flex items-center gap-3 p-2.5 rounded border border-slate-200 bg-white transition shadow-sm';
+      badge.className = 'w-7 h-7 rounded bg-slate-100 text-slate-700 font-mono text-xs font-bold flex items-center justify-center border border-slate-300 flex-shrink-0';
+      status.textContent = 'Ready';
+      status.className = 'text-[10px] font-medium text-slate-500 font-mono';
     }
-  }
+  });
 }
 
 /* ----------------------------------------------------
@@ -182,29 +275,29 @@ function setPipelineStep(step) {
 async function runPipeline(stepMode = false) {
   const inputHtml = document.getElementById('htmlEditor').value.trim();
   if (!inputHtml) {
-    alert('Please provide some HTML code first!');
+    alert('Please enter HTML source code in the editor.');
     return;
   }
+
+  const startTime = performance.now();
 
   // Stage 1: DETECT
   setPipelineStep(1);
   const violations = window.A11yDetector.detectViolations(inputHtml);
   currentViolations = violations;
-  renderViolations(violations);
+  renderViolationsTable(violations);
   updateBadge('detectCountBadge', violations.length, violations.length > 0 ? 'rose' : 'emerald');
 
   if (stepMode) await delay(800);
 
-  // Stage 2: FIX (Hybrid Engine)
+  // Stage 2: REMEDIATE (Hybrid Engine)
   setPipelineStep(2);
   const remediationResult = window.A11yRemediator.remediateHtml(inputHtml);
   currentRemediation = remediationResult;
-  renderRemediation(remediationResult.actions);
-  updateBadge('remediateCountBadge', remediationResult.actions.length, 'indigo');
 
   if (stepMode) await delay(800);
 
-  // Stage 3: VERIFY (The Feedback Loop)
+  // Stage 3: VERIFY (Closed Feedback Loop)
   setPipelineStep(3);
   const verification = window.A11yVerifier.verifyRemediation(
     violations,
@@ -212,155 +305,252 @@ async function runPipeline(stepMode = false) {
     remediationResult.actions
   );
   currentVerification = verification;
-  renderVerification(verification);
+  renderVerificationStatus(verification);
   updateBadge('verifyCountBadge', `${verification.resolvedCount}/${verification.initialCount}`, verification.isComplete ? 'emerald' : 'amber');
 
-  // Render Diff, Clean Code, Live Preview, and AOM Tree
+  // Update Analytical Scorecards
+  updateScorecard(violations, remediationResult, verification);
+
+  // Render Diff, Remediated Code, Live Preview, and AOM Tree
   renderDiff(inputHtml, remediationResult.remediatedHtml);
   document.getElementById('remediatedCode').textContent = remediationResult.remediatedHtml;
   updateRenderedPreview(remediationResult.remediatedHtml);
   renderAomComparison(inputHtml, remediationResult.remediatedHtml);
 
+  // Default select first issue in inspector
+  if (violations.length > 0) {
+    selectIssueRow(0);
+  }
+
   if (stepMode) await delay(400);
   setPipelineStep(4);
+
+  const duration = Math.round(performance.now() - startTime);
+  const execEl = document.getElementById('systemExecutionTime');
+  if (execEl) execEl.textContent = `Execution: ${duration}ms`;
 }
 
-function renderViolations(violations) {
-  const container = document.getElementById('violationsList');
+/* ----------------------------------------------------
+ * VIOLATIONS DATA TABLE & INSPECTOR
+ * ---------------------------------------------------- */
+function renderViolationsTable(violations) {
+  const container = document.getElementById('violationsTableContainer');
   if (!container) return;
 
   if (violations.length === 0) {
     container.innerHTML = `
-      <div class="p-4 rounded-lg bg-emerald-950/30 border border-emerald-800/40 text-emerald-300 text-xs flex items-center gap-2">
-        <span class="text-base">✅</span>
-        <span><strong>Clean Code!</strong> No WCAG AA violations detected in input snippet.</span>
+      <div class="p-6 text-center space-y-2">
+        <div class="inline-flex p-2 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <p class="text-xs font-bold text-slate-800">WCAG 2.1 AA Compliant</p>
+        <p class="text-[11px] text-slate-500">Zero accessibility violations detected in source document.</p>
       </div>`;
     return;
   }
 
-  let html = '<div class="space-y-2.5">';
-  violations.forEach((v) => {
+  let html = `
+    <table class="w-full text-left text-xs border-collapse">
+      <thead>
+        <tr class="border-b border-slate-200 bg-slate-50/70 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+          <th class="py-2 px-3">Severity</th>
+          <th class="py-2 px-3">Rule ID</th>
+          <th class="py-2 px-3">Element</th>
+          <th class="py-2 px-3">Engine</th>
+          <th class="py-2 px-3 text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">`;
+
+  violations.forEach((v, index) => {
+    const isCritical = v.impact === 'critical';
     const isDeterministic = v.category === 'deterministic';
+    const isSelected = index === selectedViolationIndex;
+
     html += `
-      <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 transition">
-        <div class="flex items-center justify-between mb-1.5">
-          <div class="flex items-center gap-1.5">
-            <span class="text-xs font-mono font-bold text-slate-200">&lt;${escapeHtml(v.selector)}&gt;</span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded font-mono uppercase font-semibold ${v.impact === 'critical' ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-amber-950 text-amber-300 border border-amber-800'}">${v.impact}</span>
-          </div>
-          <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${isDeterministic ? 'bg-blue-950 text-blue-300 border border-blue-800' : 'bg-purple-950 text-purple-300 border border-purple-800'}">
-            ${isDeterministic ? '⚙️ Deterministic' : '🧠 AI / LLM'}
+      <tr id="violation-row-${index}" onclick="selectIssueRow(${index})" class="cursor-pointer transition hover:bg-slate-50/80 ${isSelected ? 'bg-blue-50/50' : ''}">
+        <td class="py-2 px-3">
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold uppercase ${
+            isCritical ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+          }">
+            ${v.impact}
           </span>
-        </div>
-        <p class="text-xs text-slate-300 mb-2">${v.description}</p>
-        <div class="font-mono text-[11px] bg-slate-950 px-2.5 py-1.5 rounded text-rose-300/90 border border-rose-950/60 overflow-x-auto">
-          ${escapeHtml(v.elementHtml)}
-        </div>
-        <div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1">
-          <span class="text-slate-500">Criteria:</span> ${v.wcag}
-        </div>
-      </div>`;
+        </td>
+        <td class="py-2 px-3 font-mono font-medium text-slate-800">${escapeHtml(v.ruleId)}</td>
+        <td class="py-2 px-3 font-mono text-[11px] text-slate-600 truncate max-w-[90px]">&lt;${escapeHtml(v.selector)}&gt;</td>
+        <td class="py-2 px-3">
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${
+            isDeterministic ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-purple-50 text-purple-700 border border-purple-200'
+          }">
+            ${isDeterministic ? 'Deterministic' : 'AI Model'}
+          </span>
+        </td>
+        <td class="py-2 px-3 text-right">
+          <button type="button" onclick="event.stopPropagation(); selectIssueRow(${index});" class="text-[11px] text-blue-600 hover:text-blue-800 font-semibold">Inspect</button>
+        </td>
+      </tr>`;
   });
-  html += '</div>';
+
+  html += '</tbody></table>';
   container.innerHTML = html;
 }
 
-function renderRemediation(actions) {
-  const container = document.getElementById('remediationList');
-  if (!container) return;
+window.selectIssueRow = function(index) {
+  selectedViolationIndex = index;
+  const violation = currentViolations[index];
+  if (!violation) return;
 
-  if (!actions || actions.length === 0) {
-    container.innerHTML = '<div class="text-xs text-slate-500 italic p-4 text-center">No code modifications needed.</div>';
-    return;
+  // Update row selection styling
+  currentViolations.forEach((_, i) => {
+    const r = document.getElementById(`violation-row-${i}`);
+    if (r) {
+      if (i === index) {
+        r.classList.add('bg-blue-50/50');
+      } else {
+        r.classList.remove('bg-blue-50/50');
+      }
+    }
+  });
+
+  const ruleBadge = document.getElementById('inspectorRuleId');
+  if (ruleBadge) {
+    ruleBadge.textContent = violation.ruleId;
+    ruleBadge.className = 'text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200';
   }
 
-  let html = '<div class="space-y-2.5">';
-  actions.forEach((a, index) => {
-    const isAi = a.category === 'ai_interpretation';
-    html += `
-      <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 transition">
-        <div class="flex items-center justify-between mb-1.5">
-          <div class="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-            <span>${a.title}</span>
-          </div>
-          <div class="flex items-center gap-1">
-            ${isAi ? `
-              <button onclick="openAiReasoningModal(${index})" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-500/50 flex items-center gap-1 transition shadow-sm">
-                <span>🧠 AI Reasoning</span>
-                <span class="text-[9px] text-purple-300">98.6%</span>
-              </button>` : `
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-950 text-blue-300 border border-blue-800">
-                ⚙️ ${a.engine}
-              </span>
-            `}
-          </div>
-        </div>
-        <p class="text-xs text-slate-300 mb-2 leading-relaxed">${a.explanation}</p>
-        <div class="space-y-1.5 font-mono text-[11px]">
-          <div class="bg-rose-950/30 text-rose-300/80 px-2 py-1 rounded border border-rose-900/40 line-through">
-            ${escapeHtml(a.originalSnippet)}
-          </div>
-          <div class="bg-emerald-950/40 text-emerald-300 px-2 py-1 rounded border border-emerald-900/40">
-            ${escapeHtml(a.fixedSnippet)}
-          </div>
-        </div>
-      </div>`;
-  });
-  html += '</div>';
-  container.innerHTML = html;
-}
+  const action = currentRemediation ? (currentRemediation.actions.find(a => a.ruleId === violation.ruleId) || currentRemediation.actions[index]) : null;
+  const isAi = violation.category === 'ai_interpretation';
 
-function renderVerification(verification) {
-  const container = document.getElementById('verificationList');
+  const container = document.getElementById('inspectorContent');
   if (!container) return;
 
-  let headerHtml = `
-    <div class="p-3.5 rounded-xl ${verification.isComplete ? 'bg-emerald-950/40 border border-emerald-500/40' : 'bg-amber-950/40 border border-amber-500/40'} mb-3">
-      <div class="flex items-center justify-between mb-1.5">
-        <span class="text-xs font-bold text-slate-200">Re-Scan Verification Outcome</span>
-        <span class="text-xs font-mono font-bold px-2 py-0.5 rounded ${verification.isComplete ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
-          ${verification.successRate}% Resolved
-        </span>
-      </div>
-      <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-        <div class="h-full ${verification.isComplete ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${verification.successRate}%"></div>
-      </div>
-      <div class="flex justify-between text-[10px] text-slate-400 mt-2 font-medium">
-        <span>Initial Errors: <strong class="text-slate-200">${verification.initialCount}</strong></span>
-        <span>Verified Fixed: <strong class="text-emerald-400">${verification.resolvedCount}</strong></span>
-        <span>Needs Review: <strong class="text-amber-400">${verification.reviewCount}</strong></span>
-      </div>
-    </div>`;
-
-  let itemsHtml = '<div class="space-y-2.5">';
-  verification.verifiedItems.forEach((item) => {
-    const isVerified = item.status === 'VERIFIED';
-    itemsHtml += `
-      <div class="p-3 rounded-lg bg-slate-900 border ${isVerified ? 'border-emerald-900/50' : 'border-amber-900/50'}">
-        <div class="flex items-center justify-between mb-1">
-          <div class="flex items-center gap-1.5">
-            <span class="text-xs font-mono font-semibold text-slate-300">${item.ruleId}</span>
+  let patchHtml = '';
+  if (action) {
+    patchHtml = `
+      <div class="mt-2 space-y-1.5">
+        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Remediation Patch:</span>
+        <div class="space-y-1 font-mono text-[11px]">
+          <div class="bg-rose-50 text-rose-800 px-2 py-1 rounded border border-rose-200 line-through">
+            ${escapeHtml(action.originalSnippet)}
           </div>
-          <span class="text-[11px] font-semibold px-2 py-0.5 rounded font-mono ${isVerified ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' : 'bg-amber-950 text-amber-300 border border-amber-700'}">
-            ${item.statusBadge}
-          </span>
-        </div>
-        <p class="text-xs text-slate-400 mt-1">${item.explanation}</p>
-        <div class="mt-2 text-[10px] text-slate-500 flex justify-between">
-          <span>Engine: ${item.engine}</span>
-          <span>${item.wcagCriteria}</span>
+          <div class="bg-emerald-50 text-emerald-800 px-2 py-1 rounded border border-emerald-200">
+            ${escapeHtml(action.fixedSnippet)}
+          </div>
         </div>
       </div>`;
-  });
-  itemsHtml += '</div>';
+  }
 
-  container.innerHTML = headerHtml + itemsHtml;
+  let aiButtonHtml = '';
+  if (isAi && action) {
+    aiButtonHtml = `
+      <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+        <span class="text-[11px] text-purple-700 font-medium">Contextual Semantic Model (98.6% Confidence)</span>
+        <button type="button" onclick="openAiReasoningModal(${index})" class="px-2 py-1 rounded bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-semibold transition flex items-center gap-1">
+          <span>Inspect Reasoning</span>
+        </button>
+      </div>`;
+  }
+
+  container.innerHTML = `
+    <div class="space-y-2">
+      <div>
+        <p class="text-xs font-semibold text-slate-800">${escapeHtml(violation.description)}</p>
+        <p class="text-[11px] text-slate-500 mt-0.5">WCAG Success Criterion: <strong class="text-slate-700">${escapeHtml(violation.wcag)}</strong></p>
+      </div>
+
+      <div>
+        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Offending DOM Node:</span>
+        <div class="bg-slate-50 px-2.5 py-1.5 rounded border border-slate-200 font-mono text-[11px] text-slate-800 overflow-x-auto">
+          ${escapeHtml(violation.elementHtml)}
+        </div>
+      </div>
+
+      ${patchHtml}
+      ${aiButtonHtml}
+    </div>`;
+};
+
+/* ----------------------------------------------------
+ * VERIFICATION STATUS BANNER
+ * ---------------------------------------------------- */
+function renderVerificationStatus(verification) {
+  const badge = document.getElementById('verificationStatusBadge');
+  const progressBar = document.getElementById('verificationProgressBar');
+  const detailsText = document.getElementById('verificationDetailsText');
+
+  if (badge) {
+    if (verification.isComplete) {
+      badge.textContent = 'VERIFIED COMPLIANT';
+      badge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-300';
+    } else {
+      badge.textContent = 'NEEDS REVIEW';
+      badge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-300';
+    }
+  }
+
+  if (progressBar) {
+    progressBar.style.width = `${verification.successRate}%`;
+    progressBar.className = verification.isComplete ? 'bg-emerald-600 h-1.5 rounded-full transition-all duration-500' : 'bg-amber-500 h-1.5 rounded-full transition-all duration-500';
+  }
+
+  if (detailsText) {
+    detailsText.innerHTML = `
+      Pass 2 closed-loop re-scan confirmed: <strong>${verification.resolvedCount} of ${verification.initialCount}</strong> violations eliminated.
+      ${verification.remainingCount === 0 ? 'Zero residual defects detected in transformed document.' : `${verification.remainingCount} items flagged for review.`}
+    `;
+  }
 }
 
+/* ----------------------------------------------------
+ * ANALYTICAL SCORECARD METRICS
+ * ---------------------------------------------------- */
+function updateScorecard(violations, remediation, verification) {
+  const initial = violations.length;
+  const resolved = verification.resolvedCount;
+  const remaining = verification.remainingCount;
+
+  // Pass rate
+  const passRate = verification.successRate;
+  const rateEl = document.getElementById('scorePassRate');
+  const rateDelta = document.getElementById('scorePassRateDelta');
+  const rateBar = document.getElementById('scorePassRateBar');
+
+  if (rateEl) rateEl.textContent = `${passRate}%`;
+  if (rateDelta) {
+    rateDelta.textContent = passRate === 100 ? '+100% verified' : `${passRate}% resolved`;
+    rateDelta.className = passRate === 100 ? 'text-xs font-mono font-semibold text-emerald-600' : 'text-xs font-mono font-semibold text-amber-600';
+  }
+  if (rateBar) {
+    rateBar.style.width = `${passRate}%`;
+    rateBar.className = passRate === 100 ? 'bg-emerald-600 h-1.5 rounded-full transition-all duration-500' : 'bg-blue-600 h-1.5 rounded-full transition-all duration-500';
+  }
+
+  // Initial count
+  const initEl = document.getElementById('scoreInitialCount');
+  if (initEl) initEl.textContent = initial;
+
+  // Resolved count
+  const resEl = document.getElementById('scoreResolvedCount');
+  if (resEl) resEl.textContent = resolved;
+
+  // Remaining count
+  const remEl = document.getElementById('scoreRemainingCount');
+  const auditStatus = document.getElementById('scoreAuditStatus');
+  if (remEl) remEl.textContent = remaining;
+  if (auditStatus) {
+    auditStatus.textContent = remaining === 0 ? 'PASSED' : 'FLAGGED';
+    auditStatus.className = remaining === 0 ? 'text-xs font-mono font-bold text-emerald-700' : 'text-xs font-mono font-bold text-amber-700';
+  }
+}
+
+/* ----------------------------------------------------
+ * DIFF & PREVIEW
+ * ---------------------------------------------------- */
 function renderDiff(orig, mod) {
   const diffLines = window.A11yDiff.computeLineDiff(orig, mod);
   const diffHtml = window.A11yDiff.renderDiffHtml(diffLines);
-  document.getElementById('diffView').innerHTML = diffHtml;
+  const diffEl = document.getElementById('diffView');
+  if (diffEl) diffEl.innerHTML = diffHtml;
 }
 
 function updateRenderedPreview(html) {
@@ -369,18 +559,18 @@ function updateRenderedPreview(html) {
 
   const styledDocument = `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
       <meta charset="utf-8">
       <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #ffffff; color: #1e293b; margin: 0; }
-        h1 { font-size: 1.5rem; margin-top: 0; }
-        h2 { font-size: 1.25rem; color: #334155; }
-        h4 { font-size: 1rem; color: #64748b; }
-        img { max-width: 140px; height: auto; border-radius: 8px; border: 1px solid #e2e8f0; display: block; margin: 10px 0; }
-        input, select, textarea { display: block; margin: 6px 0 16px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 240px; }
-        label { display: block; font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
-        button { background: #4f46e5; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 16px; background: #ffffff; color: #0f172a; margin: 0; line-height: 1.5; }
+        h1 { font-size: 1.35rem; margin-top: 0; color: #0f172a; }
+        h2 { font-size: 1.15rem; color: #1e293b; }
+        h4 { font-size: 0.95rem; color: #475569; }
+        img { max-width: 140px; height: auto; border-radius: 4px; border: 1px solid #e2e8f0; display: block; margin: 8px 0; }
+        input, select, textarea { display: block; margin: 4px 0 12px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; width: 220px; }
+        label { display: block; font-size: 11px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
+        button { background: #2563eb; color: #ffffff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; }
       </style>
     </head>
     <body>
@@ -391,7 +581,7 @@ function updateRenderedPreview(html) {
 }
 
 /* ----------------------------------------------------
- * INNOVATION 1: ACCESSIBILITY TREE (AOM) COMPARISON
+ * ACCESSIBILITY OBJECT MODEL (AOM) COMPARISON
  * ---------------------------------------------------- */
 function renderAomComparison(beforeHtml, afterHtml) {
   const container = document.getElementById('aomTreeContainer');
@@ -402,19 +592,19 @@ function renderAomComparison(beforeHtml, afterHtml) {
 
   const html = `
     <div class="space-y-4">
-      <div class="p-2.5 rounded-lg bg-indigo-950/30 border border-indigo-900/50 text-[11px] text-indigo-300">
-        <strong>Accessible Object Model (AOM):</strong> The internal accessibility tree exposed to screen readers and assistive tech.
+      <div class="p-2.5 rounded bg-slate-50 border border-slate-200 text-xs text-slate-700">
+        <strong>Accessible Object Model (AOM):</strong> Browser accessibility tree nodes exposed to assistive technology and screen readers.
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <div class="text-[11px] font-bold text-rose-400 mb-1.5 flex items-center gap-1">
-            <span>❌ BEFORE AOM Tree (Inaccessible)</span>
+          <div class="text-[11px] font-bold text-rose-700 mb-1.5 flex items-center gap-1">
+            <span>Initial AOM Tree (Inaccessible)</span>
           </div>
           ${window.A11yAOM.renderAomTreeHtml(beforeTree, 'Before')}
         </div>
         <div>
-          <div class="text-[11px] font-bold text-emerald-400 mb-1.5 flex items-center gap-1">
-            <span>✅ AFTER AOM Tree (Verified)</span>
+          <div class="text-[11px] font-bold text-emerald-700 mb-1.5 flex items-center gap-1">
+            <span>Verified AOM Tree (Remediated)</span>
           </div>
           ${window.A11yAOM.renderAomTreeHtml(afterTree, 'After')}
         </div>
@@ -425,7 +615,7 @@ function renderAomComparison(beforeHtml, afterHtml) {
 }
 
 /* ----------------------------------------------------
- * INNOVATION 2: VISION IMPAIRMENT SIMULATOR
+ * VISION IMPAIRMENT SIMULATOR
  * ---------------------------------------------------- */
 function setupVisionSimulator() {
   const select = document.getElementById('visionFilterSelect');
@@ -438,7 +628,7 @@ function setupVisionSimulator() {
 }
 
 /* ----------------------------------------------------
- * INNOVATION 3: AI REASONING & TRANSPARENCY INSPECTOR
+ * AI REASONING & TRANSPARENCY INSPECTOR
  * ---------------------------------------------------- */
 function setupAiModal() {
   const modal = document.getElementById('aiModal');
@@ -460,39 +650,39 @@ window.openAiReasoningModal = function(actionIndex) {
   let altsHtml = '';
   details.alternatives.forEach(altText => {
     altsHtml += `
-      <div class="flex items-center justify-between p-2 rounded bg-slate-950 border border-slate-800 text-xs">
-        <span class="text-slate-300 font-mono">"${escapeHtml(altText)}"</span>
-        <button onclick="applyAiAlternative('${escapeHtml(altText)}')" class="px-2 py-0.5 rounded bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-800 text-[10px] font-bold transition">
-          Use This
+      <div class="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200 text-xs">
+        <span class="text-slate-800 font-mono">"${escapeHtml(altText)}"</span>
+        <button type="button" onclick="applyAiAlternative('${escapeHtml(altText)}')" class="px-2 py-0.5 rounded bg-white hover:bg-slate-50 text-blue-700 border border-blue-200 text-[11px] font-semibold transition shadow-sm">
+          Apply Suggestion
         </button>
       </div>`;
   });
 
   container.innerHTML = `
-    <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2 text-xs">
+    <div class="p-3 bg-slate-50 rounded border border-slate-200 space-y-2 text-xs">
       <div class="flex justify-between items-center">
-        <span class="text-slate-400 font-semibold">Model:</span>
-        <span class="font-mono text-purple-300 font-bold">${details.model}</span>
+        <span class="text-slate-600 font-semibold">Model Architecture:</span>
+        <span class="font-mono text-purple-700 font-bold">${details.model}</span>
       </div>
       <div class="flex justify-between items-center">
-        <span class="text-slate-400 font-semibold">Confidence Score:</span>
-        <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-mono font-bold">${details.confidence}</span>
+        <span class="text-slate-600 font-semibold">Inference Confidence:</span>
+        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono font-bold">${details.confidence}</span>
       </div>
       <div class="flex justify-between items-center">
-        <span class="text-slate-400 font-semibold">Target Resource:</span>
-        <span class="font-mono text-slate-200">${details.targetResource}</span>
+        <span class="text-slate-600 font-semibold">Target Element Resource:</span>
+        <span class="font-mono text-slate-800">${details.targetResource}</span>
       </div>
     </div>
 
     <div>
-      <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Context Signals Extracted:</span>
+      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Context Signals Extracted:</span>
       <div class="space-y-1 font-mono text-[11px]">
-        ${details.contextSignals.map(s => `<div class="p-1.5 rounded bg-slate-950/70 border border-slate-800 text-indigo-300">✓ ${s}</div>`).join('')}
+        ${details.contextSignals.map(s => `<div class="p-1.5 rounded bg-slate-50 border border-slate-200 text-slate-700">&bull; ${s}</div>`).join('')}
       </div>
     </div>
 
     <div>
-      <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Alternative AI Alt-Text Suggestions:</span>
+      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Alternative Suggestions:</span>
       <div class="space-y-1.5">
         ${altsHtml}
       </div>
@@ -507,18 +697,26 @@ window.applyAiAlternative = function(newAlt) {
   if (!editor) return;
 
   const currentCode = editor.value;
-  // Re-run with custom alt option
   const res = window.A11yRemediator.remediateHtml(currentCode, { customAlt: newAlt });
   currentRemediation = res;
-  renderRemediation(res.actions);
+
+  // Re-verify
+  if (currentViolations.length > 0) {
+    const verification = window.A11yVerifier.verifyRemediation(currentViolations, res.remediatedHtml, res.actions);
+    currentVerification = verification;
+    renderVerificationStatus(verification);
+    updateScorecard(currentViolations, res, verification);
+  }
+
+  renderDiff(currentCode, res.remediatedHtml);
   document.getElementById('remediatedCode').textContent = res.remediatedHtml;
   updateRenderedPreview(res.remediatedHtml);
   document.getElementById('aiModal')?.classList.add('hidden');
-  alert(`Applied alternative alt text: "${newAlt}"`);
+  selectIssueRow(selectedViolationIndex);
 };
 
 /* ----------------------------------------------------
- * INNOVATION 4: CI/CD GITHUB ACTION EXPORTER
+ * CI/CD GITHUB ACTION EXPORTER
  * ---------------------------------------------------- */
 function setupCicdModal() {
   const modal = document.getElementById('cicdModal');
@@ -536,8 +734,8 @@ function setupCicdModal() {
     if (yaml) {
       navigator.clipboard.writeText(yaml).then(() => {
         const btn = document.getElementById('copyYmlBtn');
-        btn.textContent = '✅ Copied!';
-        setTimeout(() => { btn.textContent = '📋 Copy YAML'; }, 1500);
+        btn.textContent = 'Copied';
+        setTimeout(() => { btn.textContent = 'Copy YAML'; }, 1500);
       });
     }
   });
@@ -571,19 +769,19 @@ function playBeforeNarration() {
   stopAudioNarration();
   const scriptData = window.A11yScreenReader.generateSpeechScript(inputHtml);
 
-  setAudioTicker('Playing BEFORE (Inaccessible Screen Reader Stream)...');
-  showAudioWaveform(true);
+  setAudioTicker('Streaming initial screen reader audio...');
+  setAudioIndicator(true);
 
   window.A11yScreenReader.speakScript(scriptData.fullText, {
     rate: 1.0,
     pitch: 0.95,
     onBoundary: (e) => {
-      const words = scriptData.fullText.substring(e.charIndex, e.charIndex + 30);
+      const words = scriptData.fullText.substring(e.charIndex, e.charIndex + 35);
       setAudioTicker(`Reading: "${words}..."`);
     },
     onEnd: () => {
-      setAudioTicker('Finished BEFORE narration. Try playing AFTER to hear the difference!');
-      showAudioWaveform(false);
+      setAudioTicker('Completed initial audio stream. Test remediated HTML to compare.');
+      setAudioIndicator(false);
     }
   });
 }
@@ -600,26 +798,26 @@ function playAfterNarration() {
   stopAudioNarration();
   const scriptData = window.A11yScreenReader.generateSpeechScript(modHtml);
 
-  setAudioTicker('Playing AFTER (Verified Accessible Screen Reader Stream)...');
-  showAudioWaveform(true);
+  setAudioTicker('Streaming verified remediated screen reader audio...');
+  setAudioIndicator(true);
 
   window.A11yScreenReader.speakScript(scriptData.fullText, {
     rate: 1.05,
     pitch: 1.05,
     onBoundary: (e) => {
-      const words = scriptData.fullText.substring(e.charIndex, e.charIndex + 30);
+      const words = scriptData.fullText.substring(e.charIndex, e.charIndex + 35);
       setAudioTicker(`Reading: "${words}..."`);
     },
     onEnd: () => {
-      setAudioTicker('Finished AFTER narration. Clear, verified accessibility structure!');
-      showAudioWaveform(false);
+      setAudioTicker('Completed remediated audio stream. Verified accessibility structure.');
+      setAudioIndicator(false);
     }
   });
 }
 
 function stopAudioNarration() {
   window.A11yScreenReader?.stopSpeech();
-  showAudioWaveform(false);
+  setAudioIndicator(false);
   setAudioTicker('Audio stopped. Ready.');
 }
 
@@ -628,15 +826,13 @@ function setAudioTicker(text) {
   if (el) el.textContent = text;
 }
 
-function showAudioWaveform(show) {
-  const wf = document.getElementById('audioWaveform');
-  if (!wf) return;
-  if (show) {
-    wf.classList.remove('hidden');
-    wf.classList.add('flex');
+function setAudioIndicator(active) {
+  const dot = document.getElementById('audioActiveIndicator');
+  if (!dot) return;
+  if (active) {
+    dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0';
   } else {
-    wf.classList.add('hidden');
-    wf.classList.remove('flex');
+    dot.className = 'w-2 h-2 rounded-full bg-slate-300 flex-shrink-0';
   }
 }
 
@@ -669,7 +865,7 @@ async function fetchAndRemediateUrl() {
 
   const btn = document.getElementById('fetchUrlBtn');
   const originalText = btn.innerHTML;
-  btn.innerHTML = '<span>⏳ Fetching URL...</span>';
+  btn.innerHTML = '<span>Fetching URL...</span>';
   btn.disabled = true;
 
   try {
@@ -696,6 +892,7 @@ async function fetchAndRemediateUrl() {
     }
 
     document.getElementById('htmlEditor').value = htmlContent;
+    updateCharCount(htmlContent.length);
     document.getElementById('presetDescription').textContent = `Live Scanned URL: ${targetUrl}`;
     document.getElementById('urlModal')?.classList.add('hidden');
 
@@ -759,7 +956,7 @@ function copyRemediatedCode() {
   navigator.clipboard.writeText(code).then(() => {
     const btn = document.getElementById('copyCodeBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<span>✅ Copied!</span>';
+    btn.innerHTML = '<span>Copied</span>';
     setTimeout(() => { btn.innerHTML = originalText; }, 2000);
   });
 }

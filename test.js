@@ -36,7 +36,7 @@ console.log('--- RUNNING TEST SUITE ---');
   assert.strictEqual(verification.remainingCount, 0, 'Zero violations must remain');
   assert.strictEqual(verification.resolvedCount, 3, 'All 3 violations must be resolved');
   assert.strictEqual(verification.successRate, 100, 'Success rate must be 100%');
-  console.log('✓ Test Case 1 (Pitch Script Example): PASS');
+  console.log('[PASS] Test Case 1 (Pitch Script Example): PASS');
 }
 
 // Test Case 2: Color Contrast
@@ -49,7 +49,7 @@ console.log('--- RUNNING TEST SUITE ---');
   const verification = verifyRemediation(violations, res.remediatedHtml, res.actions);
   assert.strictEqual(verification.remainingCount, 0, 'Contrast issue must be resolved');
   assert.strictEqual(verification.successRate, 100, 'Success rate must be 100%');
-  console.log('✓ Test Case 2 (Color Contrast Remediation): PASS');
+  console.log('[PASS] Test Case 2 (Color Contrast Remediation): PASS');
 }
 
 // Test Case 3: Empty Button
@@ -57,7 +57,7 @@ console.log('--- RUNNING TEST SUITE ---');
   const input = `<button></button>`;
   const res = remediateHtml(input);
   assert(res.remediatedHtml.includes('aria-label') || res.remediatedHtml.includes('Submit'), 'Button must receive accessible name');
-  console.log('✓ Test Case 3 (Button Name): PASS');
+  console.log('[PASS] Test Case 3 (Button Name): PASS');
 }
 
 // Test Case 4: Diff Computation
@@ -67,7 +67,7 @@ console.log('--- RUNNING TEST SUITE ---');
   const diffs = computeLineDiff(orig, mod);
   assert(diffs.some(d => d.type === 'removed' && d.content.includes('<h4>Shoes</h4>')), 'Diff should show removed h4');
   assert(diffs.some(d => d.type === 'added' && d.content.includes('<h2>Shoes</h2>')), 'Diff should show added h2');
-  console.log('✓ Test Case 4 (Line Diff Computation): PASS');
+  console.log('[PASS] Test Case 4 (Line Diff Computation): PASS');
 }
 
 console.log('---------------------------------');

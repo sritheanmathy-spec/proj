@@ -1,4 +1,4 @@
-﻿/**
+/**
  * A11y Remediation Engine — Verifier
  * Wrapped in UMD/IIFE to prevent global variable collision in browser.
  */
@@ -39,7 +39,7 @@
           category: initial.category,
           engine: initial.engine || (initial.category === 'ai_interpretation' ? 'AI / LLM Semantic Model' : 'Deterministic Logic'),
           status: 'VERIFIED',
-          statusBadge: 'Verified ✅',
+          statusBadge: 'Verified',
           statusColor: 'emerald',
           originalCode: initial.elementHtml,
           fixedCode: action ? action.fixedSnippet : 'Attribute / Structure modified',
@@ -54,7 +54,7 @@
           category: initial.category,
           engine: initial.engine || 'Hybrid Engine',
           status: 'NEEDS_REVIEW',
-          statusBadge: 'Needs Review ⚠️',
+          statusBadge: 'Needs Review',
           statusColor: 'amber',
           originalCode: initial.elementHtml,
           fixedCode: action ? action.fixedSnippet : 'Attempted rewrite',
