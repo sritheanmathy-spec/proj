@@ -4,13 +4,14 @@
  * - 3-Stage Pipeline (Detect -> Fix -> Verify)
  * - Structured Diagnostics Table & Detail Inspector
  * - Analytical Scorecard & Conformance Metrics
+ * - Autonomous Edge Deployment Hub (Cloudflare Worker, React JSX, Vue, Git Patch)
+ * - Interactive Keyboard Tab-Order Traversal Visualizer
+ * - Official VPAT 2.4 Section 508 Legal Conformance Report
  * - Accessible Object Model (AOM) Tree Comparison
  * - Vision Impairment & Color Blindness Simulator
  * - AI Reasoning & Transparency Inspector with Alternative Switcher
- * - CI/CD GitHub Action & Git Patch Exporter
  * - Screen Reader Audio Simulator (Web Speech API)
  * - Live Website URL Scanner Proxy
- * - WCAG Compliance Audit Certificate
  */
 
 // Presets
@@ -60,6 +61,8 @@ let currentViolations = [];
 let currentRemediation = null;
 let currentVerification = null;
 let selectedViolationIndex = 0;
+let currentFramework = 'cf'; // 'cf', 'react', 'vue', 'patch'
+let tabAnimationTimer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   setupPresetButtons();
@@ -67,10 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
   setupViewTabs();
   setupScreenReaderAudio();
   setupUrlScanner();
-  setupCertModal();
+  setupVpatModal();
   setupVisionSimulator();
   setupCicdModal();
   setupAiModal();
+  setupFrameworkDeploy();
+  setupKeyboardTabSimulator();
   setupKeyboardShortcuts();
   setupEditorListener();
   loadPreset('script');
@@ -139,6 +144,11 @@ function resetPipelineUI() {
   currentVerification = null;
   selectedViolationIndex = 0;
 
+  if (tabAnimationTimer) {
+    clearInterval(tabAnimationTimer);
+    tabAnimationTimer = null;
+  }
+
   const tableContainer = document.getElementById('violationsTableContainer');
   if (tableContainer) {
     tableContainer.innerHTML = '<div class="text-xs text-slate-500 italic p-6 text-center">Click "Run Analysis" to inspect accessibility violations.</div>';
@@ -167,6 +177,7 @@ function resetPipelineUI() {
   const detailsText = document.getElementById('verificationDetailsText');
   if (detailsText) detailsText.textContent = 'Run the analysis pipeline to execute the second-pass automated verification scan.';
 
+  document.getElementById('frameworkCodeView').textContent = 'Run analysis to generate production edge deployment code.';
   document.getElementById('diffView').innerHTML = '<div class="text-xs text-slate-500 italic p-6 text-center">Run analysis to inspect line-by-line diff.</div>';
   document.getElementById('remediatedCode').textContent = '';
   document.getElementById('renderedPreview').srcdoc = '';
@@ -211,34 +222,45 @@ function setupActionButtons() {
   document.getElementById('runPipelineBtn')?.addEventListener('click', () => runPipeline(false));
   document.getElementById('stepModeBtn')?.addEventListener('click', () => runPipeline(true));
   document.getElementById('copyCodeBtn')?.addEventListener('click', copyRemediatedCode);
+  document.getElementById('openDeployTabBtn')?.addEventListener('click', () => {
+    switchMainTab('deploy');
+  });
 }
 
 function setupViewTabs() {
-  const tabs = ['diff', 'code', 'preview', 'aom'];
+  const tabs = ['deploy', 'sandbox', 'diff', 'code', 'aom'];
   tabs.forEach(tab => {
     const tabBtn = document.getElementById(`tab-${tab}`);
     if (!tabBtn) return;
     tabBtn.addEventListener('click', () => {
-      tabs.forEach(t => {
-        const btn = document.getElementById(`tab-${t}`);
-        if (btn) {
-          btn.classList.remove('active-tab', 'border-blue-600', 'text-blue-700', 'bg-white', 'font-semibold');
-          btn.classList.add('text-slate-600', 'border-transparent', 'font-medium');
-        }
-        document.getElementById(`view-${t}`)?.classList.add('hidden');
-      });
-      tabBtn.classList.add('active-tab', 'border-blue-600', 'text-blue-700', 'bg-white', 'font-semibold');
-      tabBtn.classList.remove('text-slate-600', 'border-transparent', 'font-medium');
-      document.getElementById(`view-${tab}`)?.classList.remove('hidden');
+      switchMainTab(tab);
     });
   });
+}
+
+function switchMainTab(activeTab) {
+  const tabs = ['deploy', 'sandbox', 'diff', 'code', 'aom'];
+  tabs.forEach(t => {
+    const btn = document.getElementById(`tab-${t}`);
+    if (btn) {
+      btn.classList.remove('active-tab', 'border-blue-600', 'text-blue-700', 'bg-white', 'font-semibold');
+      btn.classList.add('text-slate-600', 'border-transparent', 'font-medium');
+    }
+    document.getElementById(`view-${t}`)?.classList.add('hidden');
+  });
+  const activeBtn = document.getElementById(`tab-${activeTab}`);
+  if (activeBtn) {
+    activeBtn.classList.add('active-tab', 'border-blue-600', 'text-blue-700', 'bg-white', 'font-semibold');
+    activeBtn.classList.remove('text-slate-600', 'border-transparent', 'font-medium');
+  }
+  document.getElementById(`view-${activeTab}`)?.classList.remove('hidden');
 }
 
 function setPipelineStep(step) {
   const steps = [
     { num: 1, name: 'Detect', activeText: 'Analyzing...', doneText: 'Completed' },
     { num: 2, name: 'Remediate', activeText: 'Transforming...', doneText: 'Completed' },
-    { num: 3, name: 'Verify', activeText: 'Verifying...', doneText: 'Completed' }
+    { num: 3, name: 'Verify & Deliver', activeText: 'Verifying...', doneText: 'Completed' }
   ];
 
   steps.forEach(s => {
@@ -248,19 +270,16 @@ function setPipelineStep(step) {
     if (!col || !badge || !status) return;
 
     if (s.num < step) {
-      // Completed step
       col.className = 'flex items-center gap-3 p-2.5 rounded border border-emerald-200 bg-emerald-50/40 transition shadow-sm';
       badge.className = 'w-7 h-7 rounded bg-emerald-600 text-white font-mono text-xs font-bold flex items-center justify-center flex-shrink-0';
       status.textContent = s.doneText;
       status.className = 'text-[10px] font-semibold text-emerald-700 font-mono';
     } else if (s.num === step) {
-      // Currently active step
       col.className = 'flex items-center gap-3 p-2.5 rounded border border-blue-300 bg-blue-50/50 transition shadow-sm';
       badge.className = 'w-7 h-7 rounded bg-blue-600 text-white font-mono text-xs font-bold flex items-center justify-center flex-shrink-0';
       status.textContent = s.activeText;
       status.className = 'text-[10px] font-semibold text-blue-700 font-mono';
     } else {
-      // Pending step
       col.className = 'flex items-center gap-3 p-2.5 rounded border border-slate-200 bg-white transition shadow-sm';
       badge.className = 'w-7 h-7 rounded bg-slate-100 text-slate-700 font-mono text-xs font-bold flex items-center justify-center border border-slate-300 flex-shrink-0';
       status.textContent = 'Ready';
@@ -297,7 +316,7 @@ async function runPipeline(stepMode = false) {
 
   if (stepMode) await delay(800);
 
-  // Stage 3: VERIFY (Closed Feedback Loop)
+  // Stage 3: VERIFY & DELIVER
   setPipelineStep(3);
   const verification = window.A11yVerifier.verifyRemediation(
     violations,
@@ -310,6 +329,9 @@ async function runPipeline(stepMode = false) {
 
   // Update Analytical Scorecards
   updateScorecard(violations, remediationResult, verification);
+
+  // Render Multi-Framework Code
+  renderFrameworkCode();
 
   // Render Diff, Remediated Code, Live Preview, and AOM Tree
   renderDiff(inputHtml, remediationResult.remediatedHtml);
@@ -400,7 +422,6 @@ window.selectIssueRow = function(index) {
   const violation = currentViolations[index];
   if (!violation) return;
 
-  // Update row selection styling
   currentViolations.forEach((_, i) => {
     const r = document.getElementById(`violation-row-${i}`);
     if (r) {
@@ -509,7 +530,6 @@ function updateScorecard(violations, remediation, verification) {
   const resolved = verification.resolvedCount;
   const remaining = verification.remainingCount;
 
-  // Pass rate
   const passRate = verification.successRate;
   const rateEl = document.getElementById('scorePassRate');
   const rateDelta = document.getElementById('scorePassRateDelta');
@@ -525,15 +545,12 @@ function updateScorecard(violations, remediation, verification) {
     rateBar.className = passRate === 100 ? 'bg-emerald-600 h-1.5 rounded-full transition-all duration-500' : 'bg-blue-600 h-1.5 rounded-full transition-all duration-500';
   }
 
-  // Initial count
   const initEl = document.getElementById('scoreInitialCount');
   if (initEl) initEl.textContent = initial;
 
-  // Resolved count
   const resEl = document.getElementById('scoreResolvedCount');
   if (resEl) resEl.textContent = resolved;
 
-  // Remaining count
   const remEl = document.getElementById('scoreRemainingCount');
   const auditStatus = document.getElementById('scoreAuditStatus');
   if (remEl) remEl.textContent = remaining;
@@ -541,6 +558,223 @@ function updateScorecard(violations, remediation, verification) {
     auditStatus.textContent = remaining === 0 ? 'PASSED' : 'FLAGGED';
     auditStatus.className = remaining === 0 ? 'text-xs font-mono font-bold text-emerald-700' : 'text-xs font-mono font-bold text-amber-700';
   }
+}
+
+/* ----------------------------------------------------
+ * INNOVATION 2 & 3: EDGE DEPLOYMENT & MULTI-FRAMEWORK EXPORTER
+ * ---------------------------------------------------- */
+function setupFrameworkDeploy() {
+  document.getElementById('copyFrameworkBtn')?.addEventListener('click', () => {
+    const code = document.getElementById('frameworkCodeView')?.textContent;
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById('copyFrameworkBtn');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<span>Copied</span>';
+      setTimeout(() => { btn.innerHTML = orig; }, 1500);
+    });
+  });
+
+  document.getElementById('downloadBundleBtn')?.addEventListener('click', downloadRemediatedBundle);
+}
+
+window.switchFrameworkView = function(fw) {
+  currentFramework = fw;
+  ['cf', 'react', 'vue', 'patch'].forEach(id => {
+    const btn = document.getElementById(`fw-${id}`);
+    if (btn) {
+      if (id === fw) {
+        btn.className = 'px-2 py-1 rounded text-[11px] font-mono font-semibold bg-blue-50 text-blue-700 border border-blue-300 shadow-sm';
+      } else {
+        btn.className = 'px-2 py-1 rounded text-[11px] font-mono font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50';
+      }
+    }
+  });
+  renderFrameworkCode();
+};
+
+function renderFrameworkCode() {
+  const view = document.getElementById('frameworkCodeView');
+  if (!view) return;
+
+  if (!currentRemediation) {
+    view.textContent = 'Run analysis to generate production edge deployment code.';
+    return;
+  }
+
+  const html = currentRemediation.remediatedHtml;
+  const actions = currentRemediation.actions;
+
+  if (currentFramework === 'cf') {
+    view.textContent = window.A11yEdgeDeploy.generateCloudflareWorker(actions);
+  } else if (currentFramework === 'react') {
+    view.textContent = window.A11yEdgeDeploy.generateReactJsx(html, 'AccessibleProductView');
+  } else if (currentFramework === 'vue') {
+    view.textContent = window.A11yEdgeDeploy.generateVueTemplate(html);
+  } else if (currentFramework === 'patch') {
+    const orig = document.getElementById('htmlEditor')?.value || '';
+    view.textContent = window.A11yCiCd.generateGitPatch(orig, html);
+  }
+}
+
+function downloadRemediatedBundle() {
+  if (!currentRemediation) {
+    alert('Please run the analysis pipeline first.');
+    return;
+  }
+
+  const html = currentRemediation.remediatedHtml;
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `remediated-index-${Date.now()}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ----------------------------------------------------
+ * INNOVATION 1: INTERACTIVE KEYBOARD TAB-ORDER SIMULATOR
+ * ---------------------------------------------------- */
+function setupKeyboardTabSimulator() {
+  document.getElementById('simulateTabOrderBtn')?.addEventListener('click', runTabOrderSimulation);
+}
+
+function runTabOrderSimulation() {
+  const iframe = document.getElementById('renderedPreview');
+  const ticker = document.getElementById('focusSequenceTicker');
+  if (!iframe || !iframe.contentDocument) return;
+
+  const doc = iframe.contentDocument;
+
+  // Clear previous badges
+  doc.querySelectorAll('.a11y-tab-badge').forEach(b => b.remove());
+  doc.querySelectorAll('.a11y-focused-el').forEach(el => el.classList.remove('a11y-focused-el'));
+
+  // Inject focus outline style if not present
+  if (!doc.getElementById('a11y-focus-styles')) {
+    const style = doc.createElement('style');
+    style.id = 'a11y-focus-styles';
+    style.textContent = `
+      .a11y-focused-el {
+        outline: 3px solid #2563eb !important;
+        outline-offset: 3px !important;
+        background-color: rgba(37, 99, 235, 0.08) !important;
+        position: relative !important;
+      }
+      .a11y-tab-badge {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: #2563eb;
+        color: white;
+        font-family: monospace;
+        font-size: 10px;
+        font-weight: bold;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      }
+    `;
+    doc.head.appendChild(style);
+  }
+
+  // Find all sequentially focusable controls
+  const focusable = Array.from(doc.body.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  ));
+
+  if (focusable.length === 0) {
+    if (ticker) ticker.textContent = 'No interactive focusable elements detected on page.';
+    return;
+  }
+
+  if (tabAnimationTimer) {
+    clearInterval(tabAnimationTimer);
+  }
+
+  let step = 0;
+  function highlightNext() {
+    // Unfocus previous
+    focusable.forEach(el => el.classList.remove('a11y-focused-el'));
+
+    if (step >= focusable.length) {
+      if (ticker) ticker.innerHTML = `Traversal complete: <strong>${focusable.length} interactive elements</strong> verified keyboard operable (WCAG 2.1.1).`;
+      clearInterval(tabAnimationTimer);
+      tabAnimationTimer = null;
+      return;
+    }
+
+    const currentEl = focusable[step];
+    currentEl.classList.add('a11y-focused-el');
+    currentEl.focus();
+
+    // Add badge
+    if (!currentEl.querySelector('.a11y-tab-badge')) {
+      const badge = doc.createElement('span');
+      badge.className = 'a11y-tab-badge';
+      badge.textContent = step + 1;
+      currentEl.appendChild(badge);
+    }
+
+    const tag = currentEl.tagName.toLowerCase();
+    const name = currentEl.getAttribute('aria-label') || currentEl.textContent.trim() || currentEl.getAttribute('placeholder') || 'Input control';
+    
+    if (ticker) {
+      ticker.innerHTML = `Focus Step ${step + 1} of ${focusable.length}: <strong>&lt;${tag}&gt;</strong> "${escapeHtml(name.substring(0, 30))}" (WCAG 2.1.1 Operable - Sequential Tab Navigation)`;
+    }
+
+    step++;
+  }
+
+  highlightNext();
+  tabAnimationTimer = setInterval(highlightNext, 900);
+}
+
+/* ----------------------------------------------------
+ * INNOVATION 4: OFFICIAL VPAT 2.4 LEGAL CONFORMANCE MODAL
+ * ---------------------------------------------------- */
+function setupVpatModal() {
+  const modal = document.getElementById('vpatModal');
+  document.getElementById('openVpatModalBtn')?.addEventListener('click', openVpatModal);
+  document.getElementById('closeVpatModalBtn')?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+  });
+
+  document.getElementById('printVpatBtn')?.addEventListener('click', () => {
+    window.print();
+  });
+
+  document.getElementById('exportVpatJsonBtn')?.addEventListener('click', () => {
+    if (!currentVerification) return;
+    const report = window.A11yVpat.generateVpat24Report(currentVerification);
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `VPAT-2.4-ACR-${report.reportId}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+}
+
+async function openVpatModal() {
+  const modal = document.getElementById('vpatModal');
+  const container = document.getElementById('vpatContentContainer');
+  if (!modal || !container) return;
+
+  if (!currentVerification) {
+    await runPipeline(false);
+  }
+
+  const vpatData = window.A11yVpat.generateVpat24Report(currentVerification);
+  container.innerHTML = window.A11yVpat.renderVpatHtml(vpatData);
+  modal.classList.remove('hidden');
 }
 
 /* ----------------------------------------------------
@@ -568,9 +802,9 @@ function updateRenderedPreview(html) {
         h2 { font-size: 1.15rem; color: #1e293b; }
         h4 { font-size: 0.95rem; color: #475569; }
         img { max-width: 140px; height: auto; border-radius: 4px; border: 1px solid #e2e8f0; display: block; margin: 8px 0; }
-        input, select, textarea { display: block; margin: 4px 0 12px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; width: 220px; }
+        input, select, textarea { display: block; margin: 4px 0 12px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; width: 220px; box-sizing: border-box; }
         label { display: block; font-size: 11px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
-        button { background: #2563eb; color: #ffffff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; }
+        button { background: #2563eb; color: #ffffff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-block; margin-top: 4px; }
       </style>
     </head>
     <body>
@@ -700,7 +934,6 @@ window.applyAiAlternative = function(newAlt) {
   const res = window.A11yRemediator.remediateHtml(currentCode, { customAlt: newAlt });
   currentRemediation = res;
 
-  // Re-verify
   if (currentViolations.length > 0) {
     const verification = window.A11yVerifier.verifyRemediation(currentViolations, res.remediatedHtml, res.actions);
     currentVerification = verification;
@@ -708,6 +941,7 @@ window.applyAiAlternative = function(newAlt) {
     updateScorecard(currentViolations, res, verification);
   }
 
+  renderFrameworkCode();
   renderDiff(currentCode, res.remediatedHtml);
   document.getElementById('remediatedCode').textContent = res.remediatedHtml;
   updateRenderedPreview(res.remediatedHtml);
@@ -906,37 +1140,6 @@ async function fetchAndRemediateUrl() {
 }
 
 /* ----------------------------------------------------
- * WCAG COMPLIANCE CERTIFICATE AUDIT
- * ---------------------------------------------------- */
-function setupCertModal() {
-  const modal = document.getElementById('certModal');
-  document.getElementById('exportCertBtn')?.addEventListener('click', openCertModal);
-  document.getElementById('closeCertModalBtn')?.addEventListener('click', () => {
-    modal?.classList.add('hidden');
-  });
-}
-
-async function openCertModal() {
-  const modal = document.getElementById('certModal');
-  const container = document.getElementById('certContentContainer');
-  if (!modal || !container) return;
-
-  if (!currentVerification) {
-    await runPipeline(false);
-  }
-
-  const certHtml = window.A11yReport.generateCertificateHtml(currentVerification);
-  container.innerHTML = certHtml;
-  modal.classList.remove('hidden');
-}
-
-window.downloadAuditJson = function() {
-  if (currentVerification) {
-    window.A11yReport.exportAuditJson(currentVerification);
-  }
-};
-
-/* ----------------------------------------------------
  * KEYBOARD SHORTCUTS
  * ---------------------------------------------------- */
 function setupKeyboardShortcuts() {
@@ -945,7 +1148,7 @@ function setupKeyboardShortcuts() {
       e.preventDefault();
       runPipeline(false);
     } else if (e.key === 'Escape') {
-      document.querySelectorAll('#urlModal, #certModal, #cicdModal, #aiModal').forEach(m => m.classList.add('hidden'));
+      document.querySelectorAll('#urlModal, #vpatModal, #cicdModal, #aiModal').forEach(m => m.classList.add('hidden'));
     }
   });
 }

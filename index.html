@@ -63,7 +63,7 @@
               WCAG 2.1 AA
             </span>
           </div>
-          <p class="text-[11px] text-slate-500 font-normal">Automated Accessibility Remediation and Verification Engine</p>
+          <p class="text-[11px] text-slate-500 font-normal">Automated Accessibility Remediation, Edge Delivery & Verification Engine</p>
         </div>
       </div>
 
@@ -76,18 +76,25 @@
           <span>Scan Live URL</span>
         </button>
 
+        <button id="openVpatModalBtn" type="button" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>VPAT 2.4 Report</span>
+        </button>
+
+        <button id="openDeployTabBtn" type="button" class="px-3 py-1.5 rounded border border-blue-300 bg-blue-50/70 hover:bg-blue-100 text-blue-700 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span>Deploy End Product</span>
+        </button>
+
         <button id="openCicdModalBtn" type="button" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
           <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <span>CI/CD Gate</span>
-        </button>
-
-        <button id="exportCertBtn" type="button" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
-          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span>Compliance Report</span>
         </button>
 
         <button id="stepModeBtn" type="button" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
@@ -143,17 +150,17 @@
           </div>
         </div>
 
-        <!-- Step 3: Verify -->
+        <!-- Step 3: Verify & Deliver -->
         <div id="step-col-3" class="flex items-center gap-3 p-2.5 rounded border border-slate-200 bg-white transition shadow-sm">
           <div id="step-badge-3" class="w-7 h-7 rounded bg-slate-100 text-slate-700 font-mono text-xs font-bold flex items-center justify-center border border-slate-300 flex-shrink-0">
             03
           </div>
           <div class="min-w-0 flex-1">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-800 tracking-wide uppercase">Stage 3: Verify</span>
+              <span class="text-xs font-bold text-slate-800 tracking-wide uppercase">Stage 3: Verify & Deliver</span>
               <span id="step-status-3" class="text-[10px] font-medium text-slate-500 font-mono">Ready</span>
             </div>
-            <p class="text-[11px] text-slate-500 truncate">Closed-loop re-scan verification & regression check</p>
+            <p class="text-[11px] text-slate-500 truncate">Closed-loop verify & Edge CDN / JSX generation</p>
           </div>
         </div>
 
@@ -165,9 +172,9 @@
   <section class="border-b border-slate-200 bg-white px-6 py-4">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h2 class="text-base font-bold text-slate-900 tracking-tight">Automated Accessibility Remediation and Verification</h2>
+        <h2 class="text-base font-bold text-slate-900 tracking-tight">Automated Accessibility Remediation, Edge Delivery & Verification</h2>
         <p class="text-xs text-slate-600 mt-0.5">
-          Deterministic AST code transformations and contextual semantic repair with automated closed-loop verification for WCAG 2.1 AA compliance.
+          Deterministic AST transformations, contextual semantic repair, streaming Edge CDN middleware, and closed-loop verification for WCAG 2.1 AA compliance.
         </p>
       </div>
 
@@ -379,13 +386,13 @@
 
     </section>
 
-    <!-- COLUMN 3: STAGE 3 — VERIFICATION & OUTPUT (4 cols) -->
+    <!-- COLUMN 3: STAGE 3 — VERIFICATION & DELIVERABLES (4 cols) -->
     <section class="lg:col-span-4 flex flex-col gap-4">
       
       <div class="flex items-center justify-between pb-2 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
-          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Verification & Output</h3>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Verification & Deliverables</h3>
         </div>
         <span id="verifyCountBadge" class="text-xs px-2 py-0.5 rounded font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-300">0</span>
       </div>
@@ -404,72 +411,110 @@
         </div>
       </div>
 
-      <!-- Output Inspection Tabs: Diff, Code, Preview, AOM Tree -->
+      <!-- Output Inspection Tabs: Deploy & Edge, Live Sandbox, Diff, Code, AOM Tree -->
       <div class="flex-1 flex flex-col bg-white rounded border border-slate-200 overflow-hidden shadow-sm">
         
         <!-- Tab Navigation Bar -->
-        <div class="flex items-center justify-between px-2 bg-slate-100/80 border-b border-slate-200">
+        <div class="flex items-center justify-between px-2 bg-slate-100/80 border-b border-slate-200 overflow-x-auto">
           <div class="flex items-center">
-            <button id="tab-diff" type="button" class="active-tab px-3 py-2 text-xs font-semibold border-b-2 border-blue-600 text-blue-700 bg-white transition">
+            <button id="tab-deploy" type="button" class="active-tab px-3 py-2 text-xs font-semibold border-b-2 border-blue-600 text-blue-700 bg-white transition flex-shrink-0">
+              Deploy & Edge
+            </button>
+            <button id="tab-sandbox" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition flex-shrink-0">
+              Live Staging & Focus
+            </button>
+            <button id="tab-diff" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition flex-shrink-0">
               Line Diff
             </button>
-            <button id="tab-code" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition">
+            <button id="tab-code" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition flex-shrink-0">
               Verified Code
             </button>
-            <button id="tab-preview" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition">
-              Visual Preview
-            </button>
-            <button id="tab-aom" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition">
+            <button id="tab-aom" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition flex-shrink-0">
               AOM Tree
             </button>
           </div>
-          <div class="flex items-center pr-1">
-            <button id="copyCodeBtn" type="button" title="Copy remediated code" class="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-200 text-xs flex items-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              <span>Copy</span>
+        </div>
+
+        <!-- TAB 1: Deploy & Multi-Framework Edge Exporter -->
+        <div id="view-deploy" class="p-3.5 flex-1 flex flex-col gap-3 overflow-y-auto max-h-[360px]">
+          <!-- Framework Sub-Selector -->
+          <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-2">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button id="fw-cf" type="button" onclick="switchFrameworkView('cf')" class="px-2 py-1 rounded text-[11px] font-mono font-semibold bg-blue-50 text-blue-700 border border-blue-300 shadow-sm">Cloudflare Edge Worker</button>
+              <button id="fw-react" type="button" onclick="switchFrameworkView('react')" class="px-2 py-1 rounded text-[11px] font-mono font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50">React (JSX)</button>
+              <button id="fw-vue" type="button" onclick="switchFrameworkView('vue')" class="px-2 py-1 rounded text-[11px] font-mono font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50">Vue.js</button>
+              <button id="fw-patch" type="button" onclick="switchFrameworkView('patch')" class="px-2 py-1 rounded text-[11px] font-mono font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50">Git .patch</button>
+            </div>
+            <button id="copyFrameworkBtn" type="button" class="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded border border-slate-300 shadow-sm flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              <span>Copy Code</span>
             </button>
+          </div>
+
+          <!-- Framework Code Viewer -->
+          <pre id="frameworkCodeView" class="font-mono text-xs text-slate-800 whitespace-pre-wrap leading-relaxed bg-slate-50 p-3 rounded border border-slate-200 max-h-[220px] overflow-y-auto select-all">Run analysis to generate production edge deployment code.</pre>
+
+          <!-- Action Deployment Buttons -->
+          <div class="flex items-center justify-between pt-2 border-t border-slate-100 flex-wrap gap-2">
+            <span class="text-[11px] text-slate-500 font-medium">Ready for immediate production deployment</span>
+            <div class="flex items-center gap-2">
+              <button id="downloadBundleBtn" type="button" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded shadow-sm flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span>Download Package</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Tab 1: Line Diff View -->
-        <div id="view-diff" class="p-3.5 flex-1 overflow-y-auto max-h-[320px]">
+        <!-- TAB 2: Live Staging Sandbox & Focus Traversal Visualizer -->
+        <div id="view-sandbox" class="hidden p-3 flex-1 flex flex-col gap-2 overflow-hidden h-[360px]">
+          <div class="flex items-center justify-between bg-slate-50 px-2.5 py-1.5 rounded border border-slate-200 text-xs flex-wrap gap-2">
+            <button id="simulateTabOrderBtn" type="button" class="px-2.5 py-1 bg-white hover:bg-slate-50 text-blue-700 border border-blue-300 rounded text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+              <span>Simulate Keyboard Focus Path (Tab)</span>
+            </button>
+            <div class="flex items-center gap-1.5">
+              <label for="visionFilterSelect" class="text-[11px] font-semibold text-slate-600">Vision:</label>
+              <select id="visionFilterSelect" class="bg-white text-slate-800 border border-slate-300 text-[11px] rounded px-2 py-0.5 focus:outline-none">
+                <option value="normal">Normal Vision</option>
+                <option value="protanopia">Protanopia (Red-Blind)</option>
+                <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
+                <option value="tritanopia">Tritanopia (Blue-Blind)</option>
+                <option value="cataracts">Cataracts / Blur</option>
+                <option value="achromatopsia">Achromatopsia (Grayscale)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Focus sequence status ticker -->
+          <div id="focusSequenceTicker" class="text-[11px] font-mono text-slate-600 bg-white px-2 py-1 rounded border border-slate-200 truncate">
+            Focus order: <span>Ready. Click "Simulate Keyboard Focus Path" to trace traversal.</span>
+          </div>
+
+          <!-- Live Preview Iframe Container -->
+          <div class="flex-1 relative rounded border border-slate-300 bg-white overflow-hidden">
+            <iframe id="renderedPreview" class="w-full h-full border-none" title="Live remediated staging sandbox"></iframe>
+          </div>
+        </div>
+
+        <!-- TAB 3: Line Diff View -->
+        <div id="view-diff" class="hidden p-3.5 flex-1 overflow-y-auto max-h-[360px]">
           <div id="diffView" class="text-xs text-slate-500 italic p-6 text-center">Run analysis to inspect line-by-line diff.</div>
         </div>
 
-        <!-- Tab 2: Remediated HTML Code View -->
-        <div id="view-code" class="hidden p-3 flex-1 overflow-y-auto max-h-[320px]">
+        <!-- TAB 4: Remediated HTML Code View -->
+        <div id="view-code" class="hidden p-3 flex-1 overflow-y-auto max-h-[360px]">
+          <div class="flex justify-end mb-2">
+            <button id="copyCodeBtn" type="button" class="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded border border-slate-300 shadow-sm flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              <span>Copy HTML</span>
+            </button>
+          </div>
           <pre id="remediatedCode" class="font-mono text-xs text-slate-800 whitespace-pre-wrap leading-relaxed bg-slate-50 p-3 rounded border border-slate-200 select-all"></pre>
         </div>
 
-        <!-- Tab 3: Live Preview & Vision Simulator -->
-        <div id="view-preview" class="hidden p-3 flex-1 flex flex-col gap-2 overflow-hidden h-[340px]">
-          <div class="flex items-center justify-between bg-slate-50 px-2.5 py-1.5 rounded border border-slate-200 text-xs">
-            <label for="visionFilterSelect" class="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              <span>Vision Impairment Simulator:</span>
-            </label>
-            <select id="visionFilterSelect" class="bg-white text-slate-800 border border-slate-300 text-[11px] rounded px-2 py-0.5 focus:outline-none focus:border-blue-500">
-              <option value="normal">Normal Vision</option>
-              <option value="protanopia">Protanopia (Red-Blind)</option>
-              <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
-              <option value="tritanopia">Tritanopia (Blue-Blind)</option>
-              <option value="cataracts">Cataracts / Blur</option>
-              <option value="achromatopsia">Achromatopsia (Grayscale)</option>
-            </select>
-          </div>
-          <!-- Live Preview Iframe Container -->
-          <div class="flex-1 relative rounded border border-slate-300 bg-white overflow-hidden">
-            <iframe id="renderedPreview" class="w-full h-full border-none" title="Live remediated HTML preview"></iframe>
-          </div>
-        </div>
-
-        <!-- Tab 4: Accessible Object Model (AOM) Tree -->
-        <div id="view-aom" class="hidden p-3.5 flex-1 overflow-y-auto max-h-[320px]">
+        <!-- TAB 5: Accessible Object Model (AOM) Tree -->
+        <div id="view-aom" class="hidden p-3.5 flex-1 overflow-y-auto max-h-[360px]">
           <div id="aomTreeContainer">
             <div class="text-xs text-slate-500 italic p-6 text-center">Run analysis to inspect Accessibility Tree hierarchy.</div>
           </div>
@@ -480,6 +525,24 @@
     </section>
 
   </main>
+
+  <!-- OFFICIAL VPAT 2.4 / ACR LEGAL CONFORMANCE MODAL -->
+  <div id="vpatModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="vpatModalTitle">
+    <div class="bg-white border border-slate-200 rounded-lg max-w-4xl w-full p-6 shadow-xl my-8 space-y-4">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2 text-slate-900 font-bold text-sm" id="vpatModalTitle">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span>VPAT 2.4 (WCAG Edition) / Section 508 Legal Conformance Report</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="printVpatBtn" type="button" class="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded border border-slate-300 shadow-sm">Print / PDF</button>
+          <button id="exportVpatJsonBtn" type="button" class="px-2.5 py-1 bg-white hover:bg-slate-50 text-blue-700 text-xs font-semibold rounded border border-blue-200 shadow-sm">Export JSON</button>
+          <button id="closeVpatModalBtn" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold ml-2">Close</button>
+        </div>
+      </div>
+      <div id="vpatContentContainer" class="space-y-4 max-h-[600px] overflow-y-auto"></div>
+    </div>
+  </div>
 
   <!-- LIVE URL SCANNER MODAL -->
   <div id="urlModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="urlModalTitle">
@@ -569,22 +632,6 @@
     </div>
   </div>
 
-  <!-- CERTIFICATE AUDIT MODAL -->
-  <div id="certModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="certModalTitle">
-    <div class="bg-white border border-slate-200 rounded-lg max-w-4xl w-full p-6 shadow-xl my-8">
-      <div class="flex justify-between items-center pb-3 border-b border-slate-200 mb-4">
-        <div class="flex items-center gap-2 text-slate-900 font-bold text-sm" id="certModalTitle">
-          <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span>WCAG 2.1 AA Compliance Audit Certificate</span>
-        </div>
-        <button id="closeCertModalBtn" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold">Close</button>
-      </div>
-      <div id="certContentContainer"></div>
-    </div>
-  </div>
-
   <!-- SYSTEM STATUS INDICATOR BAR -->
   <aside class="border-t border-slate-200 bg-slate-100 px-6 py-2 text-xs font-mono text-slate-600" aria-label="System telemetry">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
@@ -594,9 +641,9 @@
           <span>Engine Status: Online</span>
         </span>
         <span class="text-slate-300">|</span>
-        <span>Target Standard: WCAG 2.1 Level AA</span>
+        <span>Standard: WCAG 2.1 Level AA / Section 508</span>
         <span class="text-slate-300">|</span>
-        <span>Verification Gate: Active (Closed Feedback Loop)</span>
+        <span>Verification Gate: Closed-Loop Active</span>
       </div>
       <div class="flex items-center gap-3 text-slate-500 text-[11px]">
         <span id="systemExecutionTime">Execution: 0ms</span>
@@ -610,10 +657,10 @@
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
       <div>
         <span class="font-semibold text-slate-700">A11y Remediation Engine Enterprise</span> &bull; 
-        <span>W3C WAI WCAG 2.1 Level AA Reference Implementation</span>
+        <span>W3C WAI WCAG 2.1 Level AA &bull; Section 508 VPAT 2.4 Edition</span>
       </div>
       <div class="text-[11px] text-slate-500 font-mono">
-        AST Manipulation &bull; Contextual AI Reasoning &bull; Automated Regression Verification
+        AST Remediation &bull; Cloudflare HTMLRewriter &bull; React JSX Exporter &bull; Automated Verification
       </div>
     </div>
   </footer>
@@ -626,6 +673,8 @@
   <script src="engine/aom.js"></script>
   <script src="engine/vision_sim.js"></script>
   <script src="engine/cicd.js"></script>
+  <script src="engine/edge_deploy.js"></script>
+  <script src="engine/vpat.js"></script>
   <script src="engine/ai_inspector.js"></script>
   <script src="engine/screenreader.js"></script>
   <script src="engine/report.js"></script>

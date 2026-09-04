@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Automated test suite for A11y Remediation Engine
  */
 const assert = require('assert');
@@ -70,5 +70,46 @@ console.log('--- RUNNING TEST SUITE ---');
   console.log('[PASS] Test Case 4 (Line Diff Computation): PASS');
 }
 
+// Test Case 5: VPAT 2.4 / Section 508 ACR Report Generation
+{
+  const { generateVpat24Report } = require('./engine/vpat.js');
+  const mockVerification = {
+    initialCount: 3,
+    resolvedCount: 3,
+    remainingCount: 0,
+    isComplete: true,
+    verifiedItems: [
+      { ruleId: 'image-alt', status: 'VERIFIED' },
+      { ruleId: 'heading-order', status: 'VERIFIED' },
+      { ruleId: 'label', status: 'VERIFIED' }
+    ]
+  };
+  const vpat = generateVpat24Report(mockVerification);
+  assert(vpat.reportId.startsWith('ACR-VPAT-'), 'VPAT must generate an ACR report ID');
+  assert(vpat.digestHash.startsWith('sha256:'), 'VPAT must generate a SHA-256 digest');
+  assert.strictEqual(vpat.conformanceStatus, 'Conformant (Level AA)', 'Must report Level AA conformance');
+  assert(vpat.criteriaTable.length >= 8, 'Must cover at least 8 key WCAG criteria');
+  console.log('[PASS] Test Case 5 (VPAT 2.4 Report Generation): PASS');
+}
+
+// Test Case 6: Edge CDN Worker & React JSX Generation
+{
+  const { generateCloudflareWorker, generateReactJsx } = require('./engine/edge_deploy.js');
+  const mockActions = [
+    { ruleId: 'image-alt', fixedSnippet: '<img src="test.jpg" alt="Test image">' },
+    { ruleId: 'heading-order', fixedSnippet: '<h2>Section</h2>' }
+  ];
+  const workerCode = generateCloudflareWorker(mockActions, 'https://test.com');
+  assert(workerCode.includes('HTMLRewriter'), 'Cloudflare Worker must use HTMLRewriter');
+  assert(workerCode.includes("rewriter.on('img:not([alt])'"), 'Worker must attach image handler');
+
+  const rawHtml = '<div class="card"><img src="item.jpg" alt="Product"><input type="text" for="name"></div>';
+  const jsx = generateReactJsx(rawHtml, 'ProductCard');
+  assert(jsx.includes('className="card"'), 'React JSX must convert class to className');
+  assert(jsx.includes('htmlFor="name"'), 'React JSX must convert for to htmlFor');
+  assert(jsx.includes('<img') && jsx.includes('/>'), 'React JSX must self-close void tags');
+  console.log('[PASS] Test Case 6 (Edge Deploy & React JSX Exporter): PASS');
+}
+
 console.log('---------------------------------');
-console.log('ALL 4 TEST CASES PASSED SUCCESSFULLY!');
+console.log('ALL 6 TEST CASES PASSED SUCCESSFULLY!');
