@@ -1,17 +1,21 @@
 ﻿/**
- * A11y Remediation Engine — Full UI Controller
- * Includes:
- * - 3-Stage Pipeline Execution & Pitch Mode
+ * A11y Remediation Engine — High-Level Enterprise Platform Controller
+ * Integrates:
+ * - 3-Stage Pipeline (Detect -> Fix -> Verify)
+ * - Accessible Object Model (AOM) Tree Inspector
+ * - Real-Time Vision Impairment & Color Blindness Simulator
+ * - AI Reasoning & Transparency Inspector with Alternative Switcher
+ * - CI/CD GitHub Action & Git Patch Exporter
  * - Screen Reader Audio Simulator (Web Speech API)
- * - Live Website URL Proxy Ingestion
- * - WCAG Compliance Audit Certificate Generator
+ * - Live Website URL Scanner Proxy
+ * - WCAG Compliance Audit Certificate
  */
 
 // Presets
 const PRESETS = {
   script: {
     name: "Pitch Script Example",
-    description: "The exact snippet from the presentation: skipped heading (h1 -> h4), shoe.jpg without alt, unlabelled input.",
+    description: "The presentation script snippet: skipped heading (h1 -> h4), shoe.jpg without alt, unlabelled input.",
     html: `<h1>Products</h1>
 
 <h4>Shoes</h4>
@@ -33,17 +37,20 @@ const PRESETS = {
   <button></button>
 </section>`
   },
-  ecommerce: {
-    name: "E-Commerce Product Card",
-    description: "Banner image, skipped headings (h1 -> h4), pricing contrast, search input without label.",
-    html: `<div class="product-card">
-  <h1>Summer Collection</h1>
-  <h4>Running Sneakers</h4>
-  <img src="sneakers-red.png">
-  <p style="color: #999999; background: #ffffff;">High performance running footwear.</p>
-  <input type="number" placeholder="Qty">
-  <button></button>
-</div>`
+  complex: {
+    name: "Complex Real-World Store",
+    description: "Arbitrary checkout form: skipped headings, select dropdown, textarea, icon buttons, empty links.",
+    html: `<main>
+  <h3>MegaStore Checkout</h3>
+  <h5>Billing Address</h5>
+  <img src="https://example.com/assets/visa-card.png">
+  <input type="text" placeholder="Full name">
+  <select name="state"><option value="CA">California</option></select>
+  <textarea placeholder="Special delivery instructions"></textarea>
+  <p style="color: #888888; background-color: #ffffff;">Terms and conditions apply.</p>
+  <button class="btn-checkout"><svg></svg></button>
+  <a href="/terms"><i class="icon-legal"></i></a>
+</main>`
   }
 };
 
@@ -51,7 +58,6 @@ let currentViolations = [];
 let currentRemediation = null;
 let currentVerification = null;
 
-// Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   setupPresetButtons();
   setupActionButtons();
@@ -59,6 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
   setupScreenReaderAudio();
   setupUrlScanner();
   setupCertModal();
+  setupVisionSimulator();
+  setupCicdModal();
+  setupAiModal();
+  setupKeyboardShortcuts();
   loadPreset('script');
 });
 
@@ -71,13 +81,13 @@ function setupPresetButtons() {
 
   Object.entries(PRESETS).forEach(([key, preset]) => {
     const btn = document.createElement('button');
-    btn.className = `preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 ${key === 'script' ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'}`;
-    btn.innerHTML = `<span class="mr-1.5">●</span>${preset.name}`;
+    btn.className = `preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition ${key === 'script' ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200 shadow-sm' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'}`;
+    btn.innerHTML = `<span class="mr-1">●</span>${preset.name}`;
     btn.onclick = () => {
       document.querySelectorAll('.preset-btn').forEach(b => {
-        b.className = 'preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700';
+        b.className = 'preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700';
       });
-      btn.className = 'preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150 bg-indigo-600/30 border-indigo-500 text-indigo-200 shadow-sm';
+      btn.className = 'preset-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition bg-indigo-600/30 border-indigo-500 text-indigo-200 shadow-sm';
       loadPreset(key);
     };
     container.appendChild(btn);
@@ -108,6 +118,7 @@ function resetPipelineUI() {
   document.getElementById('diffView').innerHTML = '<div class="text-xs text-slate-500 italic p-6 text-center">Run pipeline to inspect line-by-line diff.</div>';
   document.getElementById('remediatedCode').textContent = '';
   document.getElementById('renderedPreview').srcdoc = '';
+  document.getElementById('aomTreeContainer').innerHTML = '<div class="text-xs text-slate-500 italic p-4 text-center">Run pipeline to inspect Accessibility Tree hierarchy.</div>';
 
   updateBadge('detectCountBadge', 0, 'slate');
   updateBadge('remediateCountBadge', 0, 'slate');
@@ -131,11 +142,10 @@ function setupActionButtons() {
   document.getElementById('runPipelineBtn')?.addEventListener('click', () => runPipeline(false));
   document.getElementById('stepModeBtn')?.addEventListener('click', () => runPipeline(true));
   document.getElementById('copyCodeBtn')?.addEventListener('click', copyRemediatedCode);
-  document.getElementById('downloadHtmlBtn')?.addEventListener('click', downloadRemediatedHtml);
 }
 
 function setupViewTabs() {
-  const tabs = ['diff', 'code', 'preview'];
+  const tabs = ['diff', 'preview', 'aom', 'code'];
   tabs.forEach(tab => {
     const tabBtn = document.getElementById(`tab-${tab}`);
     if (!tabBtn) return;
@@ -183,7 +193,7 @@ async function runPipeline(stepMode = false) {
   renderViolations(violations);
   updateBadge('detectCountBadge', violations.length, violations.length > 0 ? 'rose' : 'emerald');
 
-  if (stepMode) await delay(1000);
+  if (stepMode) await delay(800);
 
   // Stage 2: FIX (Hybrid Engine)
   setPipelineStep(2);
@@ -192,7 +202,7 @@ async function runPipeline(stepMode = false) {
   renderRemediation(remediationResult.actions);
   updateBadge('remediateCountBadge', remediationResult.actions.length, 'indigo');
 
-  if (stepMode) await delay(1000);
+  if (stepMode) await delay(800);
 
   // Stage 3: VERIFY (The Feedback Loop)
   setPipelineStep(3);
@@ -205,12 +215,13 @@ async function runPipeline(stepMode = false) {
   renderVerification(verification);
   updateBadge('verifyCountBadge', `${verification.resolvedCount}/${verification.initialCount}`, verification.isComplete ? 'emerald' : 'amber');
 
-  // Render Diff, Clean Code, Preview
+  // Render Diff, Clean Code, Live Preview, and AOM Tree
   renderDiff(inputHtml, remediationResult.remediatedHtml);
   document.getElementById('remediatedCode').textContent = remediationResult.remediatedHtml;
   updateRenderedPreview(remediationResult.remediatedHtml);
+  renderAomComparison(inputHtml, remediationResult.remediatedHtml);
 
-  if (stepMode) await delay(500);
+  if (stepMode) await delay(400);
   setPipelineStep(4);
 }
 
@@ -231,7 +242,7 @@ function renderViolations(violations) {
   violations.forEach((v) => {
     const isDeterministic = v.category === 'deterministic';
     html += `
-      <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors">
+      <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 transition">
         <div class="flex items-center justify-between mb-1.5">
           <div class="flex items-center gap-1.5">
             <span class="text-xs font-mono font-bold text-slate-200">&lt;${escapeHtml(v.selector)}&gt;</span>
@@ -264,17 +275,25 @@ function renderRemediation(actions) {
   }
 
   let html = '<div class="space-y-2.5">';
-  actions.forEach((a) => {
-    const isDeterministic = a.category === 'deterministic';
+  actions.forEach((a, index) => {
+    const isAi = a.category === 'ai_interpretation';
     html += `
-      <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors">
+      <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 transition">
         <div class="flex items-center justify-between mb-1.5">
           <div class="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
             <span>${a.title}</span>
           </div>
-          <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${isDeterministic ? 'bg-blue-950 text-blue-300 border border-blue-800' : 'bg-purple-950 text-purple-300 border border-purple-800'}">
-            ${isDeterministic ? '⚙️ ' + a.engine : '🧠 ' + a.engine}
-          </span>
+          <div class="flex items-center gap-1">
+            ${isAi ? `
+              <button onclick="openAiReasoningModal(${index})" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-500/50 flex items-center gap-1 transition shadow-sm">
+                <span>🧠 AI Reasoning</span>
+                <span class="text-[9px] text-purple-300">98.6%</span>
+              </button>` : `
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-950 text-blue-300 border border-blue-800">
+                ⚙️ ${a.engine}
+              </span>
+            `}
+          </div>
         </div>
         <p class="text-xs text-slate-300 mb-2 leading-relaxed">${a.explanation}</p>
         <div class="space-y-1.5 font-mono text-[11px]">
@@ -359,7 +378,7 @@ function updateRenderedPreview(html) {
         h2 { font-size: 1.25rem; color: #334155; }
         h4 { font-size: 1rem; color: #64748b; }
         img { max-width: 140px; height: auto; border-radius: 8px; border: 1px solid #e2e8f0; display: block; margin: 10px 0; }
-        input { display: block; margin: 6px 0 16px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 220px; }
+        input, select, textarea { display: block; margin: 6px 0 16px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; width: 240px; }
         label { display: block; font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
         button { background: #4f46e5; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
       </style>
@@ -372,7 +391,172 @@ function updateRenderedPreview(html) {
 }
 
 /* ----------------------------------------------------
- * FEATURE 1: SCREEN READER AUDIO SIMULATOR
+ * INNOVATION 1: ACCESSIBILITY TREE (AOM) COMPARISON
+ * ---------------------------------------------------- */
+function renderAomComparison(beforeHtml, afterHtml) {
+  const container = document.getElementById('aomTreeContainer');
+  if (!container || !window.A11yAOM) return;
+
+  const beforeTree = window.A11yAOM.buildAomTree(beforeHtml, false);
+  const afterTree = window.A11yAOM.buildAomTree(afterHtml, true);
+
+  const html = `
+    <div class="space-y-4">
+      <div class="p-2.5 rounded-lg bg-indigo-950/30 border border-indigo-900/50 text-[11px] text-indigo-300">
+        <strong>Accessible Object Model (AOM):</strong> The internal accessibility tree exposed to screen readers and assistive tech.
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <div class="text-[11px] font-bold text-rose-400 mb-1.5 flex items-center gap-1">
+            <span>❌ BEFORE AOM Tree (Inaccessible)</span>
+          </div>
+          ${window.A11yAOM.renderAomTreeHtml(beforeTree, 'Before')}
+        </div>
+        <div>
+          <div class="text-[11px] font-bold text-emerald-400 mb-1.5 flex items-center gap-1">
+            <span>✅ AFTER AOM Tree (Verified)</span>
+          </div>
+          ${window.A11yAOM.renderAomTreeHtml(afterTree, 'After')}
+        </div>
+      </div>
+    </div>`;
+
+  container.innerHTML = html;
+}
+
+/* ----------------------------------------------------
+ * INNOVATION 2: VISION IMPAIRMENT SIMULATOR
+ * ---------------------------------------------------- */
+function setupVisionSimulator() {
+  const select = document.getElementById('visionFilterSelect');
+  if (!select || !window.A11yVision) return;
+
+  select.addEventListener('change', (e) => {
+    const iframe = document.getElementById('renderedPreview');
+    window.A11yVision.applyVisionFilter(e.target.value, iframe);
+  });
+}
+
+/* ----------------------------------------------------
+ * INNOVATION 3: AI REASONING & TRANSPARENCY INSPECTOR
+ * ---------------------------------------------------- */
+function setupAiModal() {
+  const modal = document.getElementById('aiModal');
+  document.getElementById('closeAiModalBtn')?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+  });
+}
+
+window.openAiReasoningModal = function(actionIndex) {
+  const modal = document.getElementById('aiModal');
+  const container = document.getElementById('aiModalContent');
+  if (!modal || !container || !currentRemediation) return;
+
+  const action = currentRemediation.actions[actionIndex];
+  if (!action) return;
+
+  const details = window.A11yAiInspector.getAiReasoningDetails(action);
+
+  let altsHtml = '';
+  details.alternatives.forEach(altText => {
+    altsHtml += `
+      <div class="flex items-center justify-between p-2 rounded bg-slate-950 border border-slate-800 text-xs">
+        <span class="text-slate-300 font-mono">"${escapeHtml(altText)}"</span>
+        <button onclick="applyAiAlternative('${escapeHtml(altText)}')" class="px-2 py-0.5 rounded bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-800 text-[10px] font-bold transition">
+          Use This
+        </button>
+      </div>`;
+  });
+
+  container.innerHTML = `
+    <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2 text-xs">
+      <div class="flex justify-between items-center">
+        <span class="text-slate-400 font-semibold">Model:</span>
+        <span class="font-mono text-purple-300 font-bold">${details.model}</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-slate-400 font-semibold">Confidence Score:</span>
+        <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-mono font-bold">${details.confidence}</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-slate-400 font-semibold">Target Resource:</span>
+        <span class="font-mono text-slate-200">${details.targetResource}</span>
+      </div>
+    </div>
+
+    <div>
+      <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Context Signals Extracted:</span>
+      <div class="space-y-1 font-mono text-[11px]">
+        ${details.contextSignals.map(s => `<div class="p-1.5 rounded bg-slate-950/70 border border-slate-800 text-indigo-300">✓ ${s}</div>`).join('')}
+      </div>
+    </div>
+
+    <div>
+      <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Alternative AI Alt-Text Suggestions:</span>
+      <div class="space-y-1.5">
+        ${altsHtml}
+      </div>
+    </div>
+  `;
+
+  modal.classList.remove('hidden');
+};
+
+window.applyAiAlternative = function(newAlt) {
+  const editor = document.getElementById('htmlEditor');
+  if (!editor) return;
+
+  const currentCode = editor.value;
+  // Re-run with custom alt option
+  const res = window.A11yRemediator.remediateHtml(currentCode, { customAlt: newAlt });
+  currentRemediation = res;
+  renderRemediation(res.actions);
+  document.getElementById('remediatedCode').textContent = res.remediatedHtml;
+  updateRenderedPreview(res.remediatedHtml);
+  document.getElementById('aiModal')?.classList.add('hidden');
+  alert(`Applied alternative alt text: "${newAlt}"`);
+};
+
+/* ----------------------------------------------------
+ * INNOVATION 4: CI/CD GITHUB ACTION EXPORTER
+ * ---------------------------------------------------- */
+function setupCicdModal() {
+  const modal = document.getElementById('cicdModal');
+  document.getElementById('openCicdModalBtn')?.addEventListener('click', () => {
+    if (window.A11yCiCd) {
+      document.getElementById('cicdYmlContent').textContent = window.A11yCiCd.generateGitHubActionYaml();
+    }
+    modal?.classList.remove('hidden');
+  });
+  document.getElementById('closeCicdModalBtn')?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+  });
+  document.getElementById('copyYmlBtn')?.addEventListener('click', () => {
+    const yaml = document.getElementById('cicdYmlContent')?.textContent;
+    if (yaml) {
+      navigator.clipboard.writeText(yaml).then(() => {
+        const btn = document.getElementById('copyYmlBtn');
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => { btn.textContent = '📋 Copy YAML'; }, 1500);
+      });
+    }
+  });
+  document.getElementById('downloadPatchBtn')?.addEventListener('click', () => {
+    const orig = document.getElementById('htmlEditor')?.value || '';
+    const mod = currentRemediation ? currentRemediation.remediatedHtml : orig;
+    const patch = window.A11yCiCd.generateGitPatch(orig, mod);
+    const blob = new Blob([patch], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `a11y-remediation-${Date.now()}.patch`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+}
+
+/* ----------------------------------------------------
+ * SCREEN READER AUDIO SIMULATOR
  * ---------------------------------------------------- */
 function setupScreenReaderAudio() {
   document.getElementById('playBeforeAudioBtn')?.addEventListener('click', playBeforeNarration);
@@ -387,7 +571,7 @@ function playBeforeNarration() {
   stopAudioNarration();
   const scriptData = window.A11yScreenReader.generateSpeechScript(inputHtml);
 
-  setAudioTicker('Playing BEFORE (Unremediated Screen Reader Stream)...');
+  setAudioTicker('Playing BEFORE (Inaccessible Screen Reader Stream)...');
   showAudioWaveform(true);
 
   window.A11yScreenReader.speakScript(scriptData.fullText, {
@@ -407,7 +591,6 @@ function playBeforeNarration() {
 function playAfterNarration() {
   let modHtml = currentRemediation ? currentRemediation.remediatedHtml : null;
   if (!modHtml) {
-    // Auto remediate first
     const inputHtml = document.getElementById('htmlEditor').value.trim();
     if (!inputHtml) return;
     const res = window.A11yRemediator.remediateHtml(inputHtml);
@@ -458,7 +641,7 @@ function showAudioWaveform(show) {
 }
 
 /* ----------------------------------------------------
- * FEATURE 2: LIVE WEBSITE URL SCANNER
+ * LIVE WEBSITE URL SCANNER
  * ---------------------------------------------------- */
 function setupUrlScanner() {
   const modal = document.getElementById('urlModal');
@@ -503,7 +686,6 @@ async function fetchAndRemediateUrl() {
     document.getElementById('presetDescription').textContent = `Live Scanned URL: ${targetUrl} (${data.length} characters analyzed)`;
     document.getElementById('urlModal')?.classList.add('hidden');
 
-    // Run pipeline automatically
     await runPipeline(false);
   } catch (err) {
     alert(`Error connecting to fetch proxy: ${err.message}`);
@@ -514,7 +696,7 @@ async function fetchAndRemediateUrl() {
 }
 
 /* ----------------------------------------------------
- * FEATURE 3: WCAG COMPLIANCE CERTIFICATE AUDIT
+ * WCAG COMPLIANCE CERTIFICATE AUDIT
  * ---------------------------------------------------- */
 function setupCertModal() {
   const modal = document.getElementById('certModal');
@@ -529,7 +711,6 @@ async function openCertModal() {
   const container = document.getElementById('certContentContainer');
   if (!modal || !container) return;
 
-  // If pipeline hasn't run yet, run it
   if (!currentVerification) {
     await runPipeline(false);
   }
@@ -546,8 +727,19 @@ window.downloadAuditJson = function() {
 };
 
 /* ----------------------------------------------------
- * UTILITIES
+ * KEYBOARD SHORTCUTS
  * ---------------------------------------------------- */
+function setupKeyboardShortcuts() {
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      runPipeline(false);
+    } else if (e.key === 'Escape') {
+      document.querySelectorAll('#urlModal, #certModal, #cicdModal, #aiModal').forEach(m => m.classList.add('hidden'));
+    }
+  });
+}
+
 function copyRemediatedCode() {
   const code = document.getElementById('remediatedCode')?.textContent;
   if (!code) return;
@@ -557,18 +749,6 @@ function copyRemediatedCode() {
     btn.innerHTML = '<span>✅ Copied!</span>';
     setTimeout(() => { btn.innerHTML = originalText; }, 2000);
   });
-}
-
-function downloadRemediatedHtml() {
-  const code = document.getElementById('remediatedCode')?.textContent;
-  if (!code) return;
-  const blob = new Blob([code], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'accessible-remediated-code.html';
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 function escapeHtml(str) {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A11y Remediation Engine — Detect → Fix → Verify</title>
+  <title>A11y Remediation Engine — High-Level Enterprise Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -37,60 +37,50 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500/30">
 
   <!-- TOP HEADER -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-6 py-3.5">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+  <header class="border-b border-slate-800/90 bg-slate-900/90 backdrop-blur-xl sticky top-0 z-40 px-6 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
       
-      <!-- Brand & Pitch Hook -->
+      <!-- Brand & Platform Badges -->
       <div class="flex items-center gap-3">
-        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-500/20 text-white font-black text-lg">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-black text-lg">
           A
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-bold text-base tracking-tight text-white">A11y Remediation Engine</h1>
+            <h1 class="font-bold text-sm sm:text-base tracking-tight text-white flex items-center gap-1.5">
+              <span>A11y Remediation Engine</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 font-mono font-bold">v2.0 PRO</span>
+            </h1>
             <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-semibold">
               WCAG 2.1 AA
             </span>
           </div>
-          <p class="text-xs text-slate-400">Detect → Fix (Hybrid) → Verify (Feedback Loop)</p>
+          <p class="text-[11px] text-slate-400">Detect → Fix (Deterministic & AI) → Verify (Feedback Loop)</p>
         </div>
       </div>
 
-      <!-- Pipeline Step Indicators -->
-      <div class="flex items-center gap-2">
-        <div id="step-indicator-1" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400">
-          <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-          <span>1. Detect</span>
-        </div>
-        <span class="text-slate-600 text-xs">→</span>
-        <div id="step-indicator-2" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400">
-          <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-          <span>2. Fix</span>
-        </div>
-        <span class="text-slate-600 text-xs">→</span>
-        <div id="step-indicator-3" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-400">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>3. Verify</span>
-        </div>
-      </div>
-
-      <!-- Primary Action Buttons -->
-      <div class="flex items-center gap-2">
-        <button id="openUrlModalBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-800/60 transition shadow-sm">
+      <!-- Action Navigation Buttons -->
+      <div class="flex items-center flex-wrap gap-1.5">
+        <button id="openUrlModalBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-800/50 transition flex items-center gap-1">
           <span>🌐</span>
-          <span>Scan Live URL</span>
+          <span class="hidden sm:inline">Scan URL</span>
         </button>
-        <button id="exportCertBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-800/60 transition shadow-sm">
+        <button id="openCicdModalBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-violet-300 border border-violet-800/50 transition flex items-center gap-1">
+          <span>🚀</span>
+          <span class="hidden sm:inline">CI/CD Gate</span>
+        </button>
+        <button id="exportCertBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-800/50 transition flex items-center gap-1">
           <span>📄</span>
-          <span>Certificate</span>
+          <span class="hidden sm:inline">Certificate</span>
         </button>
-        <button id="stepModeBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-sm">
+        <button id="stepModeBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1">
           <span>🎬</span>
           <span>Pitch Mode</span>
         </button>
-        <button id="runPipelineBtn" class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-md shadow-indigo-600/30">
+        <button id="runPipelineBtn" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-md shadow-indigo-600/30">
           <span>⚡</span>
           <span>Run Pipeline</span>
+          <kbd class="hidden md:inline text-[9px] font-mono bg-indigo-800/60 px-1 py-0.5 rounded text-indigo-200">Ctrl+↵</kbd>
         </button>
       </div>
 
@@ -122,7 +112,6 @@
 
       <!-- Live Speech Transcript Ticker -->
       <div class="flex-1 max-w-lg flex items-center gap-2 bg-slate-950/60 px-3 py-1 rounded-lg border border-slate-800">
-        <!-- Audio waveform animation -->
         <div id="audioWaveform" class="hidden items-center gap-0.5 h-4">
           <span class="w-1 bg-indigo-400 rounded-full audio-bar-1"></span>
           <span class="w-1 bg-indigo-400 rounded-full audio-bar-2"></span>
@@ -139,7 +128,7 @@
   <div class="border-b border-slate-800/80 bg-slate-900/40 px-6 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-2">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Demo Presets:</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Presets:</span>
         <div id="presetButtons" class="flex items-center gap-1.5"></div>
       </div>
       <div id="presetDescription" class="text-xs text-slate-400 italic"></div>
@@ -163,7 +152,7 @@
       <div class="flex flex-col bg-slate-900/90 rounded-xl border border-slate-800 overflow-hidden shadow-sm">
         <div class="px-3 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
           <span>source-input.html</span>
-          <span class="text-[10px] text-slate-500">Editable Snippet</span>
+          <span class="text-[10px] text-slate-500">Editable (Paste ANY HTML)</span>
         </div>
         <textarea id="htmlEditor" rows="7" spellcheck="false" class="w-full bg-slate-950 p-3.5 font-mono text-xs text-slate-200 leading-relaxed focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y border-none" placeholder="Paste HTML code to analyze..."></textarea>
       </div>
@@ -171,8 +160,8 @@
       <!-- Detected Violations List -->
       <div class="flex-1 flex flex-col bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
         <div class="px-3.5 py-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-300">axe-core Scanner Diagnostics</span>
-          <span class="text-[10px] text-slate-500">Classification Engine</span>
+          <span class="text-xs font-semibold text-slate-300">axe-core Diagnostics</span>
+          <span class="text-[10px] text-slate-500">Diagnostic Scanner</span>
         </div>
         <div id="violationsList" class="p-3.5 flex-1 overflow-y-auto max-h-[380px]">
           <div class="text-xs text-slate-500 italic p-4 text-center">Click "Run Pipeline" to detect accessibility violations.</div>
@@ -196,16 +185,16 @@
           <span>⚙️ Deterministic vs. 🧠 AI Philosophy</span>
         </div>
         <p class="text-[11px] text-slate-400 leading-relaxed">
-          <strong>Deterministic Math/Rules:</strong> Heading hierarchy & luminance math.<br>
-          <strong>Contextual AI / LLM:</strong> Missing alt text semantic reasoning.
+          <strong>Deterministic Math:</strong> Contrast luminance & heading outline tree.<br>
+          <strong>Contextual AI / LLM:</strong> Semantic alt text synthesis with transparency reasoning.
         </p>
       </div>
 
       <!-- Generated Fixes List -->
       <div class="flex-1 flex flex-col bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
         <div class="px-3.5 py-2.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-300">AST Transformations & Reasoning</span>
-          <span class="text-[10px] text-slate-500">Source Patches</span>
+          <span class="text-xs font-semibold text-slate-300">AST Transformations & Patches</span>
+          <span class="text-[10px] text-slate-500">Click AI cards for reasoning</span>
         </div>
         <div id="remediationList" class="p-3.5 flex-1 overflow-y-auto max-h-[460px]">
           <div class="text-xs text-slate-500 italic p-4 text-center">Remediation steps will appear here.</div>
@@ -230,28 +219,28 @@
         </div>
       </div>
 
-      <!-- Output Tabs: Diff, Code, Preview -->
+      <!-- Output Tabs: Diff, Code, Preview, AOM Tree -->
       <div class="flex-1 flex flex-col bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
         
         <!-- Tab Navigation -->
         <div class="flex items-center justify-between px-3 bg-slate-900/90 border-b border-slate-800">
           <div class="flex items-center gap-1">
-            <button id="tab-diff" class="active-tab px-3 py-2 text-xs font-semibold border-b-2 border-indigo-500 text-indigo-400 transition-colors">
-              Code Diff
+            <button id="tab-diff" class="active-tab px-2.5 py-2 text-xs font-semibold border-b-2 border-indigo-500 text-indigo-400 transition">
+              Diff
             </button>
-            <button id="tab-code" class="px-3 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors">
-              Clean HTML
+            <button id="tab-preview" class="px-2.5 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
+              Preview
             </button>
-            <button id="tab-preview" class="px-3 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors">
-              Live Preview
+            <button id="tab-aom" class="px-2.5 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
+              AOM Tree
+            </button>
+            <button id="tab-code" class="px-2.5 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
+              Code
             </button>
           </div>
           <div class="flex items-center gap-1">
-            <button id="copyCodeBtn" title="Copy remediated code" class="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors text-xs flex items-center gap-1">
+            <button id="copyCodeBtn" title="Copy code" class="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 text-xs flex items-center gap-1">
               <span>📋 Copy</span>
-            </button>
-            <button id="downloadHtmlBtn" title="Download HTML file" class="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors text-xs flex items-center gap-1">
-              <span>💾 Save</span>
             </button>
           </div>
         </div>
@@ -266,9 +255,33 @@
           <pre id="remediatedCode" class="font-mono text-xs text-emerald-300 whitespace-pre-wrap leading-relaxed bg-slate-950 p-3 rounded-lg border border-slate-800"></pre>
         </div>
 
-        <!-- Tab 3: Rendered Live Preview -->
-        <div id="view-preview" class="hidden p-2 flex-1 overflow-hidden h-[300px]">
-          <iframe id="renderedPreview" class="w-full h-full rounded-lg bg-white border border-slate-700"></iframe>
+        <!-- Tab 3: Live Preview & Vision Simulator -->
+        <div id="view-preview" class="hidden p-3 flex-1 flex flex-col gap-2 overflow-hidden h-[340px]">
+          <!-- Vision Impairment Selector -->
+          <div class="flex items-center justify-between bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-800 text-xs">
+            <span class="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+              <span>👁️ Vision Simulator:</span>
+            </span>
+            <select id="visionFilterSelect" class="bg-slate-900 text-slate-200 border border-slate-700 text-[11px] rounded px-2 py-0.5 focus:outline-none">
+              <option value="normal">Normal Vision</option>
+              <option value="protanopia">Protanopia (Red-Blind)</option>
+              <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
+              <option value="tritanopia">Tritanopia (Blue-Blind)</option>
+              <option value="cataracts">Cataracts / Blur</option>
+              <option value="achromatopsia">Achromatopsia (Grayscale)</option>
+            </select>
+          </div>
+          <!-- Live Preview Iframe Container -->
+          <div class="flex-1 relative rounded-lg overflow-hidden border border-slate-700 bg-white">
+            <iframe id="renderedPreview" class="w-full h-full border-none"></iframe>
+          </div>
+        </div>
+
+        <!-- Tab 4: Accessible Object Model (AOM) Tree -->
+        <div id="view-aom" class="hidden p-3.5 flex-1 overflow-y-auto max-h-[300px]">
+          <div id="aomTreeContainer">
+            <div class="text-xs text-slate-500 italic p-4 text-center">Run pipeline to inspect Accessibility Tree hierarchy.</div>
+          </div>
         </div>
 
       </div>
@@ -286,17 +299,13 @@
         </div>
         <button id="closeUrlModalBtn" class="text-slate-400 hover:text-white text-base">✕</button>
       </div>
-
       <p class="text-xs text-slate-400 leading-relaxed">
         Enter any public web address. Our backend proxy will fetch the HTML, sanitize assets, and feed it into the <strong>Detect → Fix → Verify</strong> pipeline.
       </p>
-
       <div>
         <label class="block text-xs font-mono text-slate-400 mb-1">Target Website URL:</label>
         <input id="targetUrlInput" type="url" placeholder="https://example.com" value="https://example.com" class="w-full bg-slate-950 px-3.5 py-2 rounded-lg border border-slate-800 font-mono text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500">
       </div>
-
-      <!-- Quick Shortcuts -->
       <div>
         <span class="text-[11px] text-slate-500 block mb-1.5">Quick Examples:</span>
         <div class="flex flex-wrap gap-1.5">
@@ -305,13 +314,57 @@
           <button onclick="setUrlPreset('https://wikipedia.org')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 rounded border border-slate-700">Wikipedia</button>
         </div>
       </div>
-
       <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
         <button id="cancelUrlBtn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg">Cancel</button>
         <button id="fetchUrlBtn" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-lg shadow flex items-center gap-1.5">
           <span>Fetch & Auto-Remediate</span>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- CI/CD INTEGRATION & GITHUB ACTION MODAL -->
+  <div id="cicdModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-violet-400 font-bold text-sm">
+          <span>🚀</span>
+          <span>CI/CD Developer Integration Hub</span>
+        </div>
+        <button id="closeCicdModalBtn" class="text-slate-400 hover:text-white text-base">✕</button>
+      </div>
+      <p class="text-xs text-slate-400 leading-relaxed">
+        Integrate automated accessibility remediation directly into developer repositories, pull requests, and automated deployment pipelines.
+      </p>
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label class="text-xs font-mono text-slate-400">.github/workflows/a11y-verify.yml</label>
+          <button id="copyYmlBtn" class="text-[11px] text-violet-300 hover:text-white font-mono">📋 Copy YAML</button>
+        </div>
+        <pre id="cicdYmlContent" class="bg-slate-950 p-3 rounded-lg border border-slate-800 font-mono text-xs text-violet-200 overflow-x-auto max-h-[220px]"></pre>
+      </div>
+      <div class="flex justify-between items-center pt-2 border-t border-slate-800">
+        <button id="downloadPatchBtn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-lg flex items-center gap-1.5">
+          <span>💾 Download .patch File</span>
+        </button>
+        <button onclick="document.getElementById('cicdModal').classList.add('hidden')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI REASONING & TRANSPARENCY MODAL -->
+  <div id="aiModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-purple-400 font-bold text-sm">
+          <span>🧠</span>
+          <span>AI Reasoning & Contextual Inspection</span>
+        </div>
+        <button id="closeAiModalBtn" class="text-slate-400 hover:text-white text-base">✕</button>
+      </div>
+      <div id="aiModalContent" class="space-y-3"></div>
     </div>
   </div>
 
@@ -325,9 +378,7 @@
         </div>
         <button id="closeCertModalBtn" class="text-slate-400 hover:text-white text-base">✕</button>
       </div>
-      <div id="certContentContainer">
-        <!-- Rendered certificate dynamically placed here -->
-      </div>
+      <div id="certContentContainer"></div>
     </div>
   </div>
 
@@ -335,20 +386,24 @@
   <footer class="border-t border-slate-800/80 bg-slate-900/50 py-3 px-6 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
       <div>
-        <span>Automated Accessibility Remediation Engine</span> &bull; 
+        <span>A11y Remediation Engine Enterprise</span> &bull; 
         <span class="text-slate-400">Detect &rarr; Fix &rarr; Verify</span>
       </div>
       <div class="text-slate-400 font-mono text-[11px]">
-        Built for Hackathon Live Demo & Stage Presentation
+        Accessible Object Model &bull; Vision Simulator &bull; CI/CD Gate
       </div>
     </div>
   </footer>
 
-  <!-- Scripts -->
+  <!-- Modular Scripts -->
   <script src="engine/detector.js"></script>
   <script src="engine/remediator.js"></script>
   <script src="engine/verifier.js"></script>
   <script src="engine/diff.js"></script>
+  <script src="engine/aom.js"></script>
+  <script src="engine/vision_sim.js"></script>
+  <script src="engine/cicd.js"></script>
+  <script src="engine/ai_inspector.js"></script>
   <script src="engine/screenreader.js"></script>
   <script src="engine/report.js"></script>
   <script src="app.js"></script>
