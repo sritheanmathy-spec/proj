@@ -1,97 +1,92 @@
 ﻿/**
  * A11y Remediation Engine — Verifier
- * Implements the crucial Verification Loop:
- * Re-scans the remediated code using the accessibility detection engine,
- * evaluates whether violations were truly resolved, and issues
- * "Verified ✅" or "Needs Review ⚠️" statuses.
+ * Wrapped in UMD/IIFE to prevent global variable collision in browser.
  */
+(function(root) {
+  const detector = (typeof require !== 'undefined') ? require('./detector.js') : root.A11yDetector;
+  const detectViolations = detector.detectViolations;
 
-const { detectViolations } = 
-  (typeof require !== 'undefined') ? require('./detector.js') : window.A11yDetector;
+  function verifyRemediation(initialViolations, remediatedHtml, remediationActions = []) {
+    // Pass 2: Re-run accessibility detection on the modified HTML
+    const postViolations = detectViolations(remediatedHtml);
 
-function verifyRemediation(initialViolations, remediatedHtml, remediationActions = []) {
-  // Pass 2: Re-run accessibility detection on the modified HTML
-  const postViolations = detectViolations(remediatedHtml);
+    // Map post-scan rule IDs and selectors for quick lookup
+    const remainingRuleMap = new Map();
+    postViolations.forEach(v => {
+      const key = `${v.ruleId}-${v.selector}`;
+      remainingRuleMap.set(key, (remainingRuleMap.get(key) || 0) + 1);
+    });
 
-  // Map post-scan rule IDs and selectors for quick lookup
-  const remainingRuleMap = new Map();
-  postViolations.forEach(v => {
-    const key = `${v.ruleId}-${v.selector}`;
-    remainingRuleMap.set(key, (remainingRuleMap.get(key) || 0) + 1);
-  });
+    const verifiedItems = [];
 
-  const verifiedItems = [];
+    initialViolations.forEach((initial, index) => {
+      const action = remediationActions.find(a => a.ruleId === initial.ruleId) || remediationActions[index];
+      const key = `${initial.ruleId}-${initial.selector}`;
+      const remainingCount = remainingRuleMap.get(key) || 0;
 
-  initialViolations.forEach((initial, index) => {
-    const action = remediationActions.find(a => a.ruleId === initial.ruleId) || remediationActions[index];
-    const key = `${initial.ruleId}-${initial.selector}`;
-    const remainingCount = remainingRuleMap.get(key) || 0;
+      let isResolved = remainingCount === 0;
+      
+      const stillFailing = postViolations.some(pv => pv.ruleId === initial.ruleId && pv.elementHtml === initial.elementHtml);
+      if (!stillFailing) {
+        isResolved = true;
+      }
 
-    let isResolved = remainingCount === 0;
-    
-    // Check if the specific elementouterHTML is no longer in the post violations
-    const stillFailing = postViolations.some(pv => pv.ruleId === initial.ruleId && pv.elementHtml === initial.elementHtml);
-    if (!stillFailing) {
-      isResolved = true;
-    }
+      if (isResolved) {
+        verifiedItems.push({
+          id: initial.id,
+          ruleId: initial.ruleId,
+          impact: initial.impact,
+          category: initial.category,
+          engine: initial.engine || (initial.category === 'ai_interpretation' ? 'AI / LLM Semantic Model' : 'Deterministic Logic'),
+          status: 'VERIFIED',
+          statusBadge: 'Verified ✅',
+          statusColor: 'emerald',
+          originalCode: initial.elementHtml,
+          fixedCode: action ? action.fixedSnippet : 'Attribute / Structure modified',
+          explanation: action ? action.explanation : 'Issue eliminated and verified by second-pass AST & scanner check.',
+          wcagCriteria: initial.wcag
+        });
+      } else {
+        verifiedItems.push({
+          id: initial.id,
+          ruleId: initial.ruleId,
+          impact: initial.impact,
+          category: initial.category,
+          engine: initial.engine || 'Hybrid Engine',
+          status: 'NEEDS_REVIEW',
+          statusBadge: 'Needs Review ⚠️',
+          statusColor: 'amber',
+          originalCode: initial.elementHtml,
+          fixedCode: action ? action.fixedSnippet : 'Attempted rewrite',
+          explanation: 'Residual rule violation detected in second pass. Flagged for human review.',
+          wcagCriteria: initial.wcag
+        });
+      }
+    });
 
-    if (isResolved) {
-      verifiedItems.push({
-        id: initial.id,
-        ruleId: initial.ruleId,
-        impact: initial.impact,
-        category: initial.category,
-        engine: initial.engine || (initial.category === 'ai_interpretation' ? 'AI / LLM Semantic Model' : 'Deterministic Logic'),
-        status: 'VERIFIED',
-        statusBadge: 'Verified ✅',
-        statusColor: 'emerald',
-        originalCode: initial.elementHtml,
-        fixedCode: action ? action.fixedSnippet : 'Attribute / Structure modified',
-        explanation: action ? action.explanation : 'Issue eliminated and verified by second-pass AST & scanner check.',
-        wcagCriteria: initial.wcag
-      });
-    } else {
-      verifiedItems.push({
-        id: initial.id,
-        ruleId: initial.ruleId,
-        impact: initial.impact,
-        category: initial.category,
-        engine: initial.engine || 'Hybrid Engine',
-        status: 'NEEDS_REVIEW',
-        statusBadge: 'Needs Review ⚠️',
-        statusColor: 'amber',
-        originalCode: initial.elementHtml,
-        fixedCode: action ? action.fixedSnippet : 'Attempted rewrite',
-        explanation: 'Residual rule violation detected in second pass. Flagged for human review.',
-        wcagCriteria: initial.wcag
-      });
-    }
-  });
+    const initialCount = initialViolations.length;
+    const resolvedCount = verifiedItems.filter(item => item.status === 'VERIFIED').length;
+    const reviewCount = verifiedItems.filter(item => item.status === 'NEEDS_REVIEW').length;
+    const successRate = initialCount > 0 ? Math.round((resolvedCount / initialCount) * 100) : 100;
 
-  const initialCount = initialViolations.length;
-  const resolvedCount = verifiedItems.filter(item => item.status === 'VERIFIED').length;
-  const reviewCount = verifiedItems.filter(item => item.status === 'NEEDS_REVIEW').length;
-  const successRate = initialCount > 0 ? Math.round((resolvedCount / initialCount) * 100) : 100;
+    return {
+      initialCount,
+      remainingCount: postViolations.length,
+      resolvedCount,
+      reviewCount,
+      successRate,
+      postViolations,
+      verifiedItems,
+      isComplete: postViolations.length === 0
+    };
+  }
 
-  return {
-    initialCount,
-    remainingCount: postViolations.length,
-    resolvedCount,
-    reviewCount,
-    successRate,
-    postViolations,
-    verifiedItems,
-    isComplete: postViolations.length === 0
-  };
-}
-
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
+  const api = {
     verifyRemediation
   };
-}
-if (typeof window !== 'undefined') {
-  window.A11yVerifier = {
-    verifyRemediation
-  };
-}
+
+  root.A11yVerifier = api;
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = api;
+  }
+})(typeof window !== 'undefined' ? window : global);
