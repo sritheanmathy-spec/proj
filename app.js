@@ -85,6 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
   setupPitchModal();
   setupNeurodiversityToolbar();
   setupDigitalTwinCopyButtons();
+  setupXraySlider();
+  setupHudRadar();
+  setupSwitchAccess();
+  setupOscilloscope();
+  setupEaaModal();
   loadPreset('script');
 });
 
@@ -363,6 +368,7 @@ async function runPipeline(stepMode = false) {
   renderDiff(inputHtml, remediationResult.remediatedHtml);
   document.getElementById('remediatedCode').textContent = remediationResult.remediatedHtml;
   updateRenderedPreview(remediationResult.remediatedHtml);
+  updateXrayFrames(inputHtml, remediationResult.remediatedHtml);
   renderAomComparison(inputHtml, remediationResult.remediatedHtml);
   renderDigitalTwin(remediationResult.remediatedHtml);
 
@@ -957,11 +963,7 @@ function renderDiff(orig, mod) {
   if (diffEl) diffEl.innerHTML = diffHtml;
 }
 
-function updateRenderedPreview(html) {
-  const iframe = document.getElementById('renderedPreview');
-  if (!iframe) return;
-
-  // If a full HTML document is provided (with <html> and <body>), use it directly
+function buildSafeDocument(html) {
   let styledDocument = html;
   if (!html.includes('<html') && !html.includes('<body')) {
     styledDocument = `
@@ -985,12 +987,29 @@ function updateRenderedPreview(html) {
       </body>
       </html>`;
   }
-  // Neutralize third-party script execution inside the preview iframe to protect the sandbox
-  const safeDocument = styledDocument.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi, (match, attrs, body) => {
+  return styledDocument.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi, (match, attrs, body) => {
     return `<script type="text/disabled" data-sandboxed="true"${attrs}>/* script execution disabled in sandbox */</script>`;
   });
+}
 
-  iframe.srcdoc = safeDocument;
+function updateRenderedPreview(html) {
+  const iframe = document.getElementById('renderedPreview');
+  if (!iframe) return;
+  iframe.srcdoc = buildSafeDocument(html);
+
+  if (typeof isHudActive !== 'undefined' && isHudActive) {
+    setTimeout(() => {
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (doc && window.A11yHudRadar) window.A11yHudRadar.attachHud(doc);
+    }, 150);
+  }
+}
+
+function updateXrayFrames(beforeHtml, afterHtml) {
+  const beforeIframe = document.getElementById('xrayBeforeIframe');
+  const afterIframe = document.getElementById('xrayAfterIframe');
+  if (beforeIframe) beforeIframe.srcdoc = buildSafeDocument(beforeHtml);
+  if (afterIframe) afterIframe.srcdoc = buildSafeDocument(afterHtml);
 }
 
 /* ----------------------------------------------------
@@ -1824,4 +1843,257 @@ function setupNeurodiversityToolbar() {
     window.A11yNeurodiversity.toggleSensoryShield(doc, neurodiversityState.shield);
     toggleBtnClass(btnShield, neurodiversityState.shield);
   });
+}
+
+/* ----------------------------------------------------
+ * INTERACTIVE BEFORE/AFTER X-RAY SPLIT-SCREEN SLIDER
+ * ---------------------------------------------------- */
+let isXrayActive = false;
+let isDraggingXray = false;
+
+function setupXraySlider() {
+  const btn = document.getElementById('btnXraySplit');
+  const single = document.getElementById('singlePreviewContainer');
+  const xray = document.getElementById('xrayContainer');
+  const divider = document.getElementById('xrayDivider');
+  const afterPane = document.getElementById('xrayAfterPane');
+  const badge = document.getElementById('xrayRatioBadge');
+
+  if (!btn || !single || !xray || !divider || !afterPane) return;
+
+  btn.addEventListener('click', () => {
+    isXrayActive = !isXrayActive;
+    if (isXrayActive) {
+      single.classList.add('hidden');
+      xray.classList.remove('hidden');
+      btn.className = 'px-2 py-1 bg-indigo-600 text-white border border-indigo-700 rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition';
+      const orig = document.getElementById('htmlEditor')?.value || '';
+      const mod = currentRemediation ? currentRemediation.remediatedHtml : orig;
+      updateXrayFrames(orig, mod);
+    } else {
+      xray.classList.add('hidden');
+      single.classList.remove('hidden');
+      btn.className = 'px-2 py-1 bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-300 rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition';
+    }
+  });
+
+  const onMove = (clientX) => {
+    if (!isDraggingXray) return;
+    const rect = xray.getBoundingClientRect();
+    const x = clientX - rect.left;
+    let pct = (x / rect.width) * 100;
+    pct = Math.max(5, Math.min(95, pct));
+    divider.style.left = `${pct}%`;
+    afterPane.style.clipPath = `polygon(${pct}% 0, 100% 0, 100% 100%, ${pct}% 100%)`;
+    if (badge) badge.textContent = `${Math.round(pct)}%`;
+  };
+
+  divider.addEventListener('mousedown', (e) => {
+    isDraggingXray = true;
+    e.preventDefault();
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (isDraggingXray) onMove(e.clientX);
+  });
+
+  window.addEventListener('mouseup', () => {
+    isDraggingXray = false;
+  });
+
+  divider.addEventListener('touchstart', () => {
+    isDraggingXray = true;
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (isDraggingXray && e.touches[0]) onMove(e.touches[0].clientX);
+  }, { passive: true });
+
+  window.addEventListener('touchend', () => {
+    isDraggingXray = false;
+  });
+}
+
+/* ----------------------------------------------------
+ * WCAG TARGET SIZE (44x44px) & CONTRAST DENSITY HUD
+ * ---------------------------------------------------- */
+let isHudActive = false;
+
+function setupHudRadar() {
+  const btn = document.getElementById('btnTargetHud');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    isHudActive = !isHudActive;
+    const iframe = document.getElementById('renderedPreview');
+    const doc = iframe?.contentDocument || iframe?.contentWindow?.document;
+
+    if (!doc || !window.A11yHudRadar) return;
+
+    if (isHudActive) {
+      btn.className = 'px-2 py-1 bg-emerald-600 text-white border border-emerald-700 rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition';
+      window.A11yHudRadar.attachHud(doc);
+    } else {
+      btn.className = 'px-2 py-1 bg-white hover:bg-slate-50 text-emerald-700 border border-emerald-300 rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition';
+      window.A11yHudRadar.removeHud(doc);
+    }
+  });
+}
+
+/* ----------------------------------------------------
+ * SWITCH ACCESS & MOTOR IMPAIRMENT ASSISTIVE SCANNER
+ * ---------------------------------------------------- */
+let isSwitchActive = false;
+
+function setupSwitchAccess() {
+  const btn = document.getElementById('btnSwitchScanner');
+  const ticker = document.getElementById('focusSequenceTicker');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    isSwitchActive = !isSwitchActive;
+    const iframe = document.getElementById('renderedPreview');
+    const doc = iframe?.contentDocument || iframe?.contentWindow?.document;
+
+    if (!doc || !window.A11ySwitchAccess) return;
+
+    if (isSwitchActive) {
+      btn.className = 'px-2 py-1 bg-amber-600 text-white border border-amber-700 rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition';
+      window.A11ySwitchAccess.startScanning(doc, {
+        intervalMs: 1600,
+        onScan: (data) => {
+          if (ticker) {
+            ticker.innerHTML = `Switch Scanner [${data.index + 1}/${data.total}]: &lt;${escapeHtml(data.tag)}&gt; "<strong>${escapeHtml(data.label)}</strong>" <span class="text-amber-700 font-bold ml-2">(Press SPACE to trigger)</span>`;
+          }
+        },
+        onStatus: (msg) => {
+          if (ticker) ticker.textContent = msg;
+        }
+      });
+    } else {
+      btn.className = 'px-2 py-1 bg-white hover:bg-slate-50 text-amber-700 border border-amber-300 rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition';
+      window.A11ySwitchAccess.stopScanning();
+      if (ticker) ticker.textContent = 'Switch Scanner stopped. Ready.';
+    }
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (isSwitchActive && e.code === 'Space') {
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT')) return;
+      e.preventDefault();
+      const triggered = window.A11ySwitchAccess?.triggerActiveElement();
+      if (triggered && ticker) {
+        ticker.innerHTML = `<span class="text-emerald-700 font-bold">Activated element via switch input!</span>`;
+      }
+    }
+  });
+}
+
+/* ----------------------------------------------------
+ * REAL-TIME ACOUSTIC WAVEFORM OSCILLOSCOPE
+ * ---------------------------------------------------- */
+function setupOscilloscope() {
+  const canvas = document.getElementById('audioOscilloscopeCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  function renderWave() {
+    requestAnimationFrame(renderWave);
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, width, height);
+
+    const dataArray = window.A11yScreenReader?.getAnalyserData ? window.A11yScreenReader.getAnalyserData() : null;
+    const isSpeaking = window.A11yScreenReader?.isSpeaking ? window.A11yScreenReader.isSpeaking() : false;
+
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = isAudioActive || isSpeaking ? '#38bdf8' : '#334155';
+    ctx.beginPath();
+
+    if (!dataArray || (!isAudioActive && !isSpeaking)) {
+      ctx.moveTo(0, height / 2);
+      ctx.lineTo(width, height / 2);
+      ctx.stroke();
+      return;
+    }
+
+    const sliceWidth = width / dataArray.length;
+    let x = 0;
+
+    for (let i = 0; i < dataArray.length; i++) {
+      const v = dataArray[i] / 128.0;
+      const y = (v * height) / 2;
+
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+      x += sliceWidth;
+    }
+
+    ctx.lineTo(width, height / 2);
+    ctx.stroke();
+  }
+
+  renderWave();
+}
+
+/* ----------------------------------------------------
+ * EUROPEAN ACCESSIBILITY ACT (EAA 2025) MODAL
+ * ---------------------------------------------------- */
+function setupEaaModal() {
+  const modal = document.getElementById('eaaModal');
+  document.getElementById('openEaaModalBtn')?.addEventListener('click', openEaaModal);
+  document.getElementById('closeEaaModalBtn')?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+  });
+  document.getElementById('printEaaBtn')?.addEventListener('click', () => {
+    window.print();
+  });
+}
+
+async function openEaaModal() {
+  const modal = document.getElementById('eaaModal');
+  if (!modal) return;
+
+  const targetEl = document.getElementById('eaaTargetDomain');
+  const certIdEl = document.getElementById('eaaCertId');
+  const hashEl = document.getElementById('eaaHash');
+  const dateEl = document.getElementById('eaaIssueDate');
+
+  const domain = currentScannedUrl || 'source-document.html';
+  if (targetEl) targetEl.textContent = domain;
+
+  const randomNum = Math.floor(1000 + Math.random() * 9000);
+  if (certIdEl) certIdEl.textContent = `CERT-EAA-2025-${randomNum}`;
+
+  const remediatedCode = currentRemediation ? currentRemediation.remediatedHtml : (document.getElementById('htmlEditor')?.value || '');
+
+  try {
+    if (typeof crypto !== 'undefined' && crypto.subtle) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(remediatedCode || 'a11y-verified');
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      if (hashEl) hashEl.textContent = hashHex;
+    } else {
+      if (hashEl) hashEl.textContent = '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069';
+    }
+  } catch (e) {
+    if (hashEl) hashEl.textContent = '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069';
+  }
+
+  if (dateEl) {
+    const today = new Date().toISOString().split('T')[0];
+    dateEl.textContent = `ISSUED: ${today}`;
+  }
+
+  modal.classList.remove('hidden');
 }

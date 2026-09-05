@@ -6,6 +6,8 @@
  */
 
 let audioCtx = null;
+let analyserNode = null;
+
 function getAudioContext() {
   if (typeof window === 'undefined') return null;
   if (!audioCtx) {
@@ -15,6 +17,28 @@ function getAudioContext() {
     }
   }
   return audioCtx;
+}
+
+function getAnalyser() {
+  if (typeof window === 'undefined') return null;
+  const ctx = getAudioContext();
+  if (!ctx) return null;
+  if (!analyserNode) {
+    try {
+      analyserNode = ctx.createAnalyser();
+      analyserNode.fftSize = 256;
+      analyserNode.connect(ctx.destination);
+    } catch (e) {}
+  }
+  return analyserNode;
+}
+
+function getAnalyserData() {
+  const analyser = getAnalyser();
+  if (!analyser) return new Uint8Array(128).fill(128);
+  const dataArray = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteTimeDomainData(dataArray);
+  return dataArray;
 }
 
 function calculateSpatialPan(type, el) {
@@ -66,14 +90,15 @@ function playSpatialCue(pan = 0, type = 'content') {
     gain.gain.setValueAtTime(0.04, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
 
+    const dest = getAnalyser() || ctx.destination;
     if (panner) {
       panner.pan.setValueAtTime(Math.max(-1, Math.min(1, pan)), ctx.currentTime);
       osc.connect(gain);
       gain.connect(panner);
-      panner.connect(ctx.destination);
+      panner.connect(dest);
     } else {
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(dest);
     }
 
     osc.start(ctx.currentTime);
@@ -355,7 +380,9 @@ if (typeof module !== 'undefined' && module.exports) {
     generateScriptWithRegex,
     calculateSpatialPan,
     playSpatialCue,
-    getAudioContext
+    getAudioContext,
+    getAnalyser,
+    getAnalyserData
   };
 }
 if (typeof window !== 'undefined') {
@@ -367,6 +394,8 @@ if (typeof window !== 'undefined') {
     isSpeaking,
     calculateSpatialPan,
     playSpatialCue,
-    getAudioContext
+    getAudioContext,
+    getAnalyser,
+    getAnalyserData
   };
 }
