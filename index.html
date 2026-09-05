@@ -118,6 +118,27 @@
           <span>Deploy Code</span>
         </button>
 
+        <button id="openDueDiligenceModalBtn" type="button" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold transition flex items-center gap-1.5 shadow-sm" title="Enterprise Stakeholder Due Diligence & Technical Proofs">
+          <svg class="w-3.5 h-3.5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          <span>Enterprise Due Diligence</span>
+        </button>
+
+        <button id="openPortfolioModalBtn" type="button" class="px-3 py-1.5 rounded border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-semibold transition flex items-center gap-1.5 shadow-sm" title="Multi-Page Enterprise Site / Sitemap Portfolio Auditor">
+          <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+          <span>Portfolio Audit</span>
+        </button>
+
+        <button id="openPackagerModalBtn" type="button" class="px-3 py-1.5 rounded border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold transition flex items-center gap-1.5 shadow-sm" title="Download Complete Production ZIP Package & Live Bookmarklet">
+          <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+          <span>Production Bundle</span>
+        </button>
+
         <button id="stepModeBtn" type="button" class="px-3 py-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
           <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -854,6 +875,179 @@
 
       </div>
 
+  <!-- ENTERPRISE DUE DILIGENCE & PROCUREMENT OBJECTION CENTER MODAL -->
+  <div id="dueDiligenceModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="dueDiligenceModalTitle">
+    <div class="bg-white border-2 border-slate-300 rounded-lg max-w-5xl w-full p-6 shadow-2xl my-8 space-y-4">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2 text-slate-900 font-bold text-sm" id="dueDiligenceModalTitle">
+          <div class="w-6 h-6 rounded bg-slate-800 flex items-center justify-center text-white text-xs font-mono font-bold">HQ</div>
+          <span>Enterprise Procurement & Due Diligence Dossier (Stakeholder Objections & Proofs)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="downloadDossierBtn" type="button" class="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded border border-slate-300 shadow-sm flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span>Export Due Diligence Dossier</span>
+          </button>
+          <button id="closeDueDiligenceModalBtn" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold ml-2">Close</button>
+        </div>
+      </div>
+
+      <!-- Stakeholder Track Navigation -->
+      <div class="flex items-center gap-1 border-b border-slate-200 overflow-x-auto pb-1 text-xs">
+        <button id="dd-tab-cto" type="button" onclick="switchDueDiligenceTab('cto')" class="px-3 py-1.5 font-semibold rounded-t border-b-2 border-blue-600 text-blue-700 bg-blue-50/50 flex-shrink-0">CTO & Performance</button>
+        <button id="dd-tab-engineering" type="button" onclick="switchDueDiligenceTab('engineering')" class="px-3 py-1.5 font-medium rounded-t border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex-shrink-0">VP Engineering & CI/CD</button>
+        <button id="dd-tab-legal" type="button" onclick="switchDueDiligenceTab('legal')" class="px-3 py-1.5 font-medium rounded-t border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex-shrink-0">General Counsel (Legal)</button>
+        <button id="dd-tab-design" type="button" onclick="switchDueDiligenceTab('design')" class="px-3 py-1.5 font-medium rounded-t border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex-shrink-0">CMO & Brand Design</button>
+        <button id="dd-tab-security" type="button" onclick="switchDueDiligenceTab('security')" class="px-3 py-1.5 font-medium rounded-t border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex-shrink-0">CISO & Data Privacy</button>
+        <button id="dd-tab-procurement" type="button" onclick="switchDueDiligenceTab('procurement')" class="px-3 py-1.5 font-medium rounded-t border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex-shrink-0">CFO & TCO / ROI</button>
+      </div>
+
+      <!-- Active Stakeholder Content Pane -->
+      <div id="dueDiligenceContent" class="space-y-4 text-xs max-h-[440px] overflow-y-auto pr-1"></div>
+
+      <!-- Live Interactive Latency Benchmark Widget in Modal Footer -->
+      <div class="p-3 rounded border border-slate-200 bg-slate-50 flex items-center justify-between flex-wrap gap-2 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="font-mono font-bold text-slate-700 uppercase">Live Performance Micro-Benchmark:</span>
+          <span id="benchmarkStatusBadge" class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">Ready (< 2.0ms Budget)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="benchmarkMetricsDisplay" class="font-mono text-[11px] text-slate-600">Click to execute 100 simulated DOM mutations</span>
+          <button id="runBenchmarkBtn" type="button" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow-sm">
+            Run Latency Benchmark
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTION DEPLOYMENT & ARTIFACT PACKAGER MODAL -->
+  <div id="packagerModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="packagerModalTitle">
+    <div class="bg-white border-2 border-slate-300 rounded-lg max-w-3xl w-full p-6 shadow-2xl my-8 space-y-4">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2 text-slate-900 font-bold text-sm" id="packagerModalTitle">
+          <div class="w-6 h-6 rounded bg-emerald-700 flex items-center justify-center text-white text-xs font-mono font-bold">ZIP</div>
+          <span>Enterprise Production Deployment Package & Live Bookmarklet Hub</span>
+        </div>
+        <button id="closePackagerModalBtn" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold">Close</button>
+      </div>
+
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Export the complete, production-ready accessibility asset bundle. Contains your 100% remediated HTML, self-healing client runtime (&lt;8KB), accessible stylesheet, VPAT 2.4 report, EAA 2025 cryptographic seal, and CI/CD GitHub Action.
+      </p>
+
+      <!-- 1-Click ZIP Download Section -->
+      <div class="p-4 rounded border-2 border-emerald-300 bg-emerald-50/50 flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <div class="font-bold text-emerald-950 text-sm">Download Production-Ready Bundle (.ZIP)</div>
+          <div class="text-[11px] text-emerald-800 font-mono mt-0.5">Zero-dependency package: index.remediated.html, runtime-heal.js, a11y-styles.css, vpat.md, eaa-seal.json, workflow.yml</div>
+        </div>
+        <button id="downloadZipBundleBtn" type="button" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded shadow-md flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span>Download Complete ZIP Package</span>
+        </button>
+      </div>
+
+      <!-- Live Instant Bookmarklet Section -->
+      <div class="p-4 rounded border border-slate-200 bg-slate-50 space-y-3">
+        <div>
+          <div class="font-bold text-slate-900 text-xs uppercase tracking-wide font-mono">Live Browser Bookmarklet (Instant Universal Injection)</div>
+          <p class="text-xs text-slate-600 mt-1">
+            Drag the button below to your browser bookmarks bar. Open <b>any website</b> (your company portal, staging app, or university site), click the bookmarklet, and watch it heal accessibility violations on the live page in real time!
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap">
+          <a id="draggableBookmarkletLink" href="#" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded border-2 border-blue-800 shadow cursor-grab flex items-center gap-1.5" title="Drag to your browser bookmarks bar">
+            <span>Drag Me: A11y Remediation Engine</span>
+          </a>
+          <button id="copyBookmarkletCodeBtn" type="button" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded border border-slate-300 shadow-sm flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            <span>Copy Bookmarklet Code</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Three Enterprise Rollout Pathways -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs pt-1">
+        <div class="p-3 bg-white rounded border border-slate-200 space-y-1">
+          <span class="font-bold text-slate-800 block">Pathway 1: Direct Markup</span>
+          <p class="text-[11px] text-slate-500">Deploy <code>index.remediated.html</code> directly into your CMS or origin repository. Zero runtime dependencies.</p>
+        </div>
+        <div class="p-3 bg-white rounded border border-slate-200 space-y-1">
+          <span class="font-bold text-slate-800 block">Pathway 2: 1-Line Script</span>
+          <p class="text-[11px] text-slate-500">Add <code>&lt;script src="/engine/runtime-heal.js" async&gt;</code> to application layout templates. Continuous DOM healing.</p>
+        </div>
+        <div class="p-3 bg-white rounded border border-slate-200 space-y-1">
+          <span class="font-bold text-slate-800 block">Pathway 3: Edge Streaming</span>
+          <p class="text-[11px] text-slate-500">Deploy Cloudflare / AWS Edge Worker. HTMLRewriter remediates HTML on the edge before reaching browsers.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MULTI-PAGE ENTERPRISE PORTFOLIO AUDITOR MODAL -->
+  <div id="portfolioModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="portfolioModalTitle">
+    <div class="bg-white border-2 border-slate-300 rounded-lg max-w-4xl w-full p-6 shadow-2xl my-8 space-y-4">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2 text-slate-900 font-bold text-sm" id="portfolioModalTitle">
+          <div class="w-6 h-6 rounded bg-indigo-700 flex items-center justify-center text-white text-xs font-mono font-bold">APP</div>
+          <span>Multi-Page Enterprise Site / Sitemap Portfolio Auditor</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="runPortfolioAuditBtn" type="button" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded shadow-sm flex items-center gap-1">
+            <span>Audit All 5 Enterprise Pages</span>
+          </button>
+          <button id="closePortfolioModalBtn" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold ml-2">Close</button>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Enterprise platforms are complex multi-route applications. Audit your entire page portfolio (Storefront, SSO Login, Product Catalog, Checkout, and Settings) to calculate cross-application compliance grades, developer hours saved, and corporate risk mitigation.
+      </p>
+
+      <!-- Portfolio Scorecard Metrics -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+        <div class="p-3 bg-white rounded border border-slate-200 text-center">
+          <span class="text-[10px] text-slate-500 font-mono block">ORGANIZATION GRADE</span>
+          <span id="pfGrade" class="text-2xl font-bold font-mono text-emerald-600">A+</span>
+        </div>
+        <div class="p-3 bg-white rounded border border-slate-200 text-center">
+          <span class="text-[10px] text-slate-500 font-mono block">PORTFOLIO SCORE</span>
+          <span id="pfScore" class="text-2xl font-bold font-mono text-slate-900">100%</span>
+        </div>
+        <div class="p-3 bg-white rounded border border-slate-200 text-center">
+          <span class="text-[10px] text-slate-500 font-mono block">DEFECTS REMEDIATED</span>
+          <span id="pfDefects" class="text-2xl font-bold font-mono text-blue-600">0 / 0</span>
+        </div>
+        <div class="p-3 bg-white rounded border border-slate-200 text-center">
+          <span class="text-[10px] text-slate-500 font-mono block">HOURS SAVED</span>
+          <span id="pfHours" class="text-2xl font-bold font-mono text-purple-600">0.0 hrs</span>
+        </div>
+        <div class="p-3 bg-white rounded border border-slate-200 text-center col-span-2 md:col-span-1">
+          <span class="text-[10px] text-slate-500 font-mono block">SAFE HARBOR STATUS</span>
+          <span id="pfRisk" class="text-xs font-bold font-mono text-emerald-700 block mt-2">Zero Risk</span>
+        </div>
+      </div>
+
+      <!-- Page Breakdown Table -->
+      <div class="border border-slate-200 rounded overflow-hidden">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+            <tr>
+              <th class="p-2.5">Route & Page Name</th>
+              <th class="p-2.5">Scope Description</th>
+              <th class="p-2.5 text-center">Defects Found</th>
+              <th class="p-2.5 text-center">Remediated</th>
+              <th class="p-2.5 text-center">Page Score</th>
+              <th class="p-2.5 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="portfolioTableBody" class="divide-y divide-slate-100 font-mono">
+            <!-- Rendered by app.js -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -1037,6 +1231,9 @@
   <script src="engine/hud_radar.js"></script>
   <script src="engine/switch_access.js"></script>
   <script src="engine/screenreader.js"></script>
+  <script src="engine/due_diligence.js"></script>
+  <script src="engine/packager.js"></script>
+  <script src="engine/portfolio.js"></script>
   <script src="engine/report.js"></script>
   <script src="app.js"></script>
 </body>

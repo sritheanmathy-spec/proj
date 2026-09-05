@@ -11,6 +11,9 @@ const A11yDigitalTwin = require('./engine/digital_twin.js');
 const { generateScriptWithRegex, calculateSpatialPan } = require('./engine/screenreader.js');
 const A11yHudRadar = require('./engine/hud_radar.js');
 const A11ySwitchAccess = require('./engine/switch_access.js');
+const A11yDueDiligence = require('./engine/due_diligence.js');
+const A11yPackager = require('./engine/packager.js');
+const A11yPortfolio = require('./engine/portfolio.js');
 const crypto = require('crypto');
 
 console.log('--- RUNNING TEST SUITE ---');
@@ -422,6 +425,109 @@ console.log('--- RUNNING TEST SUITE ---');
   console.log('[PASS] Test Case 15 (European Accessibility Act 2025 & DOJ Title II Conformance Certificate): PASS');
 }
 
+// Test Case 16: Enterprise Due Diligence & Stakeholder Objection Matrix
+{
+  const tracks = A11yDueDiligence.STAKEHOLDER_TRACKS;
+  const expectedTracks = ['cto', 'engineering', 'legal', 'design', 'security', 'procurement'];
+
+  expectedTracks.forEach(trackKey => {
+    assert(tracks[trackKey], `Stakeholder track ${trackKey} must be defined`);
+    assert(tracks[trackKey].role, `Track ${trackKey} must specify role`);
+    assert(tracks[trackKey].verdict, `Track ${trackKey} must specify official verdict`);
+    assert(Array.isArray(tracks[trackKey].questions), `Track ${trackKey} must have questions array`);
+    assert(tracks[trackKey].questions.length >= 3, `Track ${trackKey} must answer at least 3 procurement questions`);
+    assert(Array.isArray(tracks[trackKey].metrics), `Track ${trackKey} must have verified SLA metrics`);
+  });
+
+  const benchmark = A11yDueDiligence.runLatencyBenchmark(50);
+  assert(benchmark.totalExecutionTimeMs >= 0, 'Total execution time must be non-negative');
+  assert.strictEqual(benchmark.performanceBudgetMs, 2.0, 'Performance budget must be 2.0ms');
+  assert(benchmark.overheadStatus === 'EXCELLENT_SUB_2MS' || benchmark.overheadStatus === 'WITHIN_BUDGET', 'Status must be within budget');
+
+  const dossier = A11yDueDiligence.generateDueDiligenceDossier({
+    targetUrl: 'https://enterprise.internal',
+    sha256Seal: 'TEST-SHA-256-SEAL',
+    violationsResolved: 15
+  });
+
+  assert(dossier.includes('Enterprise Accessibility Due Diligence Dossier'), 'Dossier must have main title');
+  assert(dossier.includes('Chief Technology Officer'), 'Dossier must include CTO section');
+  assert(dossier.includes('Chief Legal Officer'), 'Dossier must include Legal section');
+  assert(dossier.includes('Directive (EU) 2019/882'), 'Dossier must cite EU EAA directive');
+  console.log('[PASS] Test Case 16 (Enterprise Due Diligence & Stakeholder Objection Matrix): PASS');
+}
+
+// Test Case 17: Production ZIP Packager & Bookmarklet Generator
+{
+  const testBytes = new Uint8Array([72, 101, 108, 108, 111]); // "Hello"
+  const crc = A11yPackager.calculateCrc32(testBytes);
+  assert(typeof crc === 'number' && crc > 0, 'CRC-32 must compute valid unsigned checksum');
+
+  const sampleFiles = [
+    { name: 'index.html', content: '<h1>Test Page</h1>' },
+    { name: 'styles.css', content: 'body { color: #0f172a; }' }
+  ];
+
+  const zipArchive = A11yPackager.createZipArchive(sampleFiles);
+  assert(zipArchive instanceof Uint8Array, 'ZIP archive must be returned as Uint8Array');
+  assert(zipArchive.length > 100, 'ZIP archive must contain byte content');
+
+  // Verify PKZIP local file header signature: 0x04034b50 -> 'P', 'K', 0x03, 0x04
+  assert.strictEqual(zipArchive[0], 0x50, 'Byte 0 must be 0x50 (P)');
+  assert.strictEqual(zipArchive[1], 0x4b, 'Byte 1 must be 0x4b (K)');
+  assert.strictEqual(zipArchive[2], 0x03, 'Byte 2 must be 0x03');
+  assert.strictEqual(zipArchive[3], 0x04, 'Byte 3 must be 0x04');
+
+  const bookmarklet = A11yPackager.generateBookmarklet('https://cdn.example.com/runtime.js');
+  assert(bookmarklet.startsWith('javascript:'), 'Bookmarklet must use javascript: URI scheme');
+  assert(bookmarklet.includes('cdn.example.com%2Fruntime.js') || bookmarklet.includes('cdn.example.com/runtime.js'), 'Bookmarklet must encode target CDN URL');
+
+  const bundleFiles = A11yPackager.generateProductionBundleFiles({
+    remediatedHtml: '<h1>Remediated</h1>',
+    runtimeHealScript: '// Runtime script',
+    vpatReport: '# VPAT Report'
+  });
+
+  assert.strictEqual(bundleFiles.length, 7, 'Production bundle must contain exactly 7 essential enterprise deployment files');
+  const filenames = bundleFiles.map(f => f.name);
+  assert(filenames.includes('index.remediated.html'), 'Bundle must include index.remediated.html');
+  assert(filenames.includes('runtime-heal.js'), 'Bundle must include runtime-heal.js');
+  assert(filenames.includes('a11y-styles.css'), 'Bundle must include a11y-styles.css');
+  assert(filenames.includes('vpat-conformance-report.md'), 'Bundle must include vpat-conformance-report.md');
+  assert(filenames.includes('eaa-2025-certificate.json'), 'Bundle must include eaa-2025-certificate.json');
+  assert(filenames.includes('.github/workflows/a11y-audit.yml'), 'Bundle must include CI/CD workflow');
+  assert(filenames.includes('DEPLOYMENT-GUIDE.md'), 'Bundle must include DEPLOYMENT-GUIDE.md');
+  console.log('[PASS] Test Case 17 (Production ZIP Packager & Bookmarklet Generator): PASS');
+}
+
+// Test Case 18: Multi-Page Site Portfolio Health Score & Batch Aggregator
+{
+  const presets = A11yPortfolio.PORTFOLIO_PRESETS;
+  assert(presets.length >= 5, 'Portfolio must define at least 5 standard enterprise routes');
+
+  assert.strictEqual(A11yPortfolio.computeGrade(98), 'A+', 'Score >= 97 must yield A+');
+  assert.strictEqual(A11yPortfolio.computeGrade(92), 'A', 'Score >= 90 must yield A');
+  assert.strictEqual(A11yPortfolio.computeGrade(82), 'B', 'Score >= 80 must yield B');
+  assert.strictEqual(A11yPortfolio.computeGrade(65), 'D', 'Score 65 must yield D');
+  assert.strictEqual(A11yPortfolio.computeGrade(45), 'F', 'Score 45 must yield F');
+
+  const zeroRisk = A11yPortfolio.computeRiskTier(0);
+  assert.strictEqual(zeroRisk.tier, 'ZERO RISK', '0 remaining defects must be ZERO RISK');
+  assert.strictEqual(zeroRisk.badge, 'Safe Harbor', '0 remaining defects must earn Safe Harbor badge');
+
+  const portfolioAudit = A11yPortfolio.auditPortfolioSuite(presets, detectViolations, remediateHtml);
+  assert.strictEqual(portfolioAudit.totalPages, 5, 'Portfolio audit must process 5 pages');
+  assert(portfolioAudit.totalDefectsDetected > 0, 'Portfolio audit must detect initial defects across sample pages');
+  assert(portfolioAudit.totalDefectsRemediated > 0, 'Portfolio audit must remediate defects across sample pages');
+  assert.strictEqual(portfolioAudit.totalRemaining, 0, 'Zero residual defects must remain after portfolio remediation');
+  assert.strictEqual(portfolioAudit.aggregateScore, 100, 'Portfolio score must achieve 100% after remediation');
+  assert.strictEqual(portfolioAudit.portfolioGrade, 'A+', 'Portfolio grade must achieve A+');
+  assert(portfolioAudit.totalHoursSaved > 0, 'Total developer hours saved must be positive');
+  assert(portfolioAudit.totalCostSavings > 0, 'Total cost savings must be positive');
+  assert.strictEqual(portfolioAudit.pageResults.length, 5, 'Must report breakdown for all 5 pages');
+  console.log('[PASS] Test Case 18 (Multi-Page Site Portfolio Health Score & Batch Aggregator): PASS');
+}
+
 console.log('---------------------------------');
-console.log('ALL 15 TEST CASES PASSED SUCCESSFULLY!');
+console.log('ALL 18 TEST CASES PASSED SUCCESSFULLY!');
 
