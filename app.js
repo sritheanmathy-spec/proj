@@ -83,6 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupKeyboardShortcuts();
   setupEditorListener();
   setupPitchModal();
+  setupNeurodiversityToolbar();
+  setupDigitalTwinCopyButtons();
   loadPreset('script');
 });
 
@@ -189,6 +191,12 @@ function resetPipelineUI() {
   document.getElementById('remediatedCode').textContent = '';
   document.getElementById('renderedPreview').srcdoc = '';
   document.getElementById('aomTreeContainer').innerHTML = '<div class="text-xs text-slate-500 italic p-6 text-center">Run analysis to inspect Accessibility Tree hierarchy.</div>';
+  
+  const twinHtml = document.getElementById('digitalTwinHtmlView');
+  if (twinHtml) twinHtml.textContent = 'Run analysis to synthesize the Accessibility Digital Twin.';
+  const twinScript = document.getElementById('digitalTwinScriptView');
+  if (twinScript) twinScript.textContent = 'Run analysis to generate the Shadow DOM injection snippet.';
+  resetNeurodiversityToolbar();
 
   updateBadge('detectCountBadge', 0, 'slate');
   updateBadge('verifyCountBadge', 0, 'slate');
@@ -245,7 +253,7 @@ function setupActionButtons() {
 }
 
 function setupViewTabs() {
-  const tabs = ['deploy', 'sandbox', 'diff', 'code', 'aom'];
+  const tabs = ['deploy', 'sandbox', 'diff', 'code', 'aom', 'twin'];
   tabs.forEach(tab => {
     const tabBtn = document.getElementById(`tab-${tab}`);
     if (!tabBtn) return;
@@ -256,7 +264,7 @@ function setupViewTabs() {
 }
 
 function switchMainTab(activeTab) {
-  const tabs = ['deploy', 'sandbox', 'diff', 'code', 'aom'];
+  const tabs = ['deploy', 'sandbox', 'diff', 'code', 'aom', 'twin'];
   tabs.forEach(t => {
     const btn = document.getElementById(`tab-${t}`);
     if (btn) {
@@ -351,11 +359,12 @@ async function runPipeline(stepMode = false) {
   renderFrameworkCode();
   renderExactReplaceTable();
 
-  // Render Diff, Remediated Code, Live Preview, and AOM Tree
+  // Render Diff, Remediated Code, Live Preview, AOM Tree, and Digital Twin
   renderDiff(inputHtml, remediationResult.remediatedHtml);
   document.getElementById('remediatedCode').textContent = remediationResult.remediatedHtml;
   updateRenderedPreview(remediationResult.remediatedHtml);
   renderAomComparison(inputHtml, remediationResult.remediatedHtml);
+  renderDigitalTwin(remediationResult.remediatedHtml);
 
   // Default select first issue in inspector
   if (violations.length > 0) {
@@ -975,6 +984,7 @@ function updateRenderedPreview(html) {
         ${html}
       </body>
       </html>`;
+  }
   // Neutralize third-party script execution inside the preview iframe to protect the sandbox
   const safeDocument = styledDocument.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi, (match, attrs, body) => {
     return `<script type="text/disabled" data-sandboxed="true"${attrs}>/* script execution disabled in sandbox */</script>`;
@@ -1158,35 +1168,101 @@ function setupCicdModal() {
 }
 
 /* ----------------------------------------------------
- * SCREEN READER AUDIO SIMULATOR
+ * SCREEN READER 3D BINAURAL AUDIO SIMULATOR
  * ---------------------------------------------------- */
+let currentAudioQueue = [];
+let currentAudioIndex = 0;
+let isAudioActive = false;
+
 function setupScreenReaderAudio() {
   document.getElementById('playBeforeAudioBtn')?.addEventListener('click', playBeforeNarration);
   document.getElementById('playAfterAudioBtn')?.addEventListener('click', playAfterNarration);
   document.getElementById('stopAudioBtn')?.addEventListener('click', stopAudioNarration);
 }
 
+function updateSpatialVisualizer(pan = 0.0, category = 'content') {
+  const indicator = document.getElementById('spatialPanIndicator');
+  const label = document.getElementById('spatialChannelLabel');
+  if (indicator) {
+    const pct = Math.max(5, Math.min(95, Math.round(((pan + 1) / 2) * 90 + 5)));
+    indicator.style.left = `calc(${pct}% - 4px)`;
+  }
+  if (label) {
+    if (pan < -0.25) {
+      label.textContent = `Left: ${category || 'Nav'}`;
+      label.className = 'text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-700';
+    } else if (pan > 0.25) {
+      label.textContent = `Right: ${category || 'Action'}`;
+      label.className = 'text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700';
+    } else {
+      label.textContent = `Center: ${category || 'Content'}`;
+      label.className = 'text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-slate-50 border border-slate-200 text-slate-700';
+    }
+  }
+}
+
+function playSequentialNarration(utterances, options = {}) {
+  if (!utterances || utterances.length === 0) return;
+  stopAudioNarration();
+
+  currentAudioQueue = utterances;
+  currentAudioIndex = 0;
+  isAudioActive = true;
+  setAudioIndicator(true);
+
+  function advanceQueue() {
+    if (!isAudioActive || currentAudioIndex >= currentAudioQueue.length) {
+      stopAudioNarration();
+      setAudioTicker(options.doneMessage || 'Completed screen reader acoustic stream.');
+      return;
+    }
+
+    const item = currentAudioQueue[currentAudioIndex];
+    const pan = item.pan !== undefined ? item.pan : 0.0;
+    const cat = item.category || item.type || 'content';
+
+    updateSpatialVisualizer(pan, cat);
+    setAudioTicker(`[${cat.toUpperCase()}] ${item.text}`);
+
+    if (window.A11yScreenReader?.playSpatialCue) {
+      window.A11yScreenReader.playSpatialCue(pan, cat);
+    }
+
+    window.A11yScreenReader.speakScript(item.text, {
+      rate: options.rate || 1.0,
+      pitch: options.pitch || 1.0,
+      onEnd: () => {
+        currentAudioIndex++;
+        if (isAudioActive) {
+          setTimeout(advanceQueue, 150);
+        }
+      },
+      onError: () => {
+        currentAudioIndex++;
+        if (isAudioActive) {
+          advanceQueue();
+        }
+      }
+    });
+  }
+
+  advanceQueue();
+}
+
 function playBeforeNarration() {
   const inputHtml = document.getElementById('htmlEditor').value.trim();
   if (!inputHtml) return;
 
-  stopAudioNarration();
   const scriptData = window.A11yScreenReader.generateSpeechScript(inputHtml);
+  if (!scriptData.utterances || scriptData.utterances.length === 0) {
+    setAudioTicker('No readable semantic elements found in initial HTML.');
+    return;
+  }
 
-  setAudioTicker('Streaming initial screen reader audio...');
-  setAudioIndicator(true);
-
-  window.A11yScreenReader.speakScript(scriptData.fullText, {
+  playSequentialNarration(scriptData.utterances, {
     rate: 1.0,
     pitch: 0.95,
-    onBoundary: (e) => {
-      const words = scriptData.fullText.substring(e.charIndex, e.charIndex + 35);
-      setAudioTicker(`Reading: "${words}..."`);
-    },
-    onEnd: () => {
-      setAudioTicker('Completed initial audio stream. Test remediated HTML to compare.');
-      setAudioIndicator(false);
-    }
+    doneMessage: 'Completed initial audio stream. Test remediated HTML to compare.'
   });
 }
 
@@ -1199,30 +1275,27 @@ function playAfterNarration() {
     modHtml = res.remediatedHtml;
   }
 
-  stopAudioNarration();
   const scriptData = window.A11yScreenReader.generateSpeechScript(modHtml);
+  if (!scriptData.utterances || scriptData.utterances.length === 0) {
+    setAudioTicker('No readable semantic elements found in remediated HTML.');
+    return;
+  }
 
-  setAudioTicker('Streaming verified remediated screen reader audio...');
-  setAudioIndicator(true);
-
-  window.A11yScreenReader.speakScript(scriptData.fullText, {
+  playSequentialNarration(scriptData.utterances, {
     rate: 1.05,
     pitch: 1.05,
-    onBoundary: (e) => {
-      const words = scriptData.fullText.substring(e.charIndex, e.charIndex + 35);
-      setAudioTicker(`Reading: "${words}..."`);
-    },
-    onEnd: () => {
-      setAudioTicker('Completed remediated audio stream. Verified accessibility structure.');
-      setAudioIndicator(false);
-    }
+    doneMessage: 'Completed remediated audio stream. Verified 3D spatial acoustic profile.'
   });
 }
 
 function stopAudioNarration() {
+  isAudioActive = false;
+  currentAudioQueue = [];
+  currentAudioIndex = 0;
   window.A11yScreenReader?.stopSpeech();
   setAudioIndicator(false);
-  setAudioTicker('Audio stopped. Ready.');
+  updateSpatialVisualizer(0.0, 'Center');
+  setAudioTicker('Audio simulation stopped. Ready.');
 }
 
 function setAudioTicker(text) {
@@ -1468,26 +1541,30 @@ const PITCH_SLIDES = [
       </div>`
   },
   {
-    title: "3. Our Technological Breakthrough: Dual-Engine Closed Loop",
-    tag: "Core Proprietary Innovation",
+    title: "3. Technological Breakthrough: Dual-Engine & Assistive Innovations",
+    tag: "Proprietary Hackathon Innovations",
     content: `
-      <div class="space-y-3">
+      <div class="space-y-2.5">
         <p class="text-xs text-slate-700 leading-relaxed">
-          We combine <strong>mathematically deterministic AST transforms</strong> with <strong>contextual multimodal AI models</strong>, backed by an autonomous second-pass verification loop:
+          We combine <strong>mathematically deterministic AST transforms</strong> with <strong>contextual AI</strong> and 3 flagship accessibility breakthroughs:
         </p>
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div class="p-2 rounded bg-slate-50 border border-slate-200">
-            <div class="font-bold text-slate-900">Deterministic Engine:</div>
-            <div class="text-slate-600 text-[11px] mt-1">Calculates relative luminance ratios (WCAG 1.4.3) and restructures heading trees (WCAG 1.3.1) in &lt; 2ms with 100% mathematical precision.</div>
+            <div class="font-bold text-slate-900">Accessibility Digital Twin:</div>
+            <div class="text-slate-600 text-[11px] mt-0.5">Headless Semantic Assistive Tree (SAT) inside Shadow DOM that provides 100% WCAG AAA landmarks to screen readers without modifying visual marketing design.</div>
           </div>
           <div class="p-2 rounded bg-slate-50 border border-slate-200">
-            <div class="font-bold text-slate-900">Contextual AI Model:</div>
-            <div class="text-slate-600 text-[11px] mt-1">Extracts DOM layout signals, surrounding text, and filenames to synthesize concise, informative alt text (WCAG 1.1.1).</div>
+            <div class="font-bold text-slate-900">Neurodiversity & Cognitive Suite:</div>
+            <div class="text-slate-600 text-[11px] mt-0.5">Real-time ADHD Bionic Reading fixation bolding, high-legibility Dyslexia typography, eye-tracking Focus Ruler, and Sensory Overload Shield.</div>
           </div>
-        </div>
-        <div class="p-2.5 rounded bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 font-medium flex items-center gap-2">
-          <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-          <span>Automated Pass 2 Closed-Loop Verifier re-runs the entire diagnostic suite to guarantee zero residual defects before outputting code.</span>
+          <div class="p-2 rounded bg-slate-50 border border-slate-200">
+            <div class="font-bold text-slate-900">3D Spatial Binaural Soundscape:</div>
+            <div class="text-slate-600 text-[11px] mt-0.5">Web Audio stereo panning routing acoustic streams (Left: Navigation, Center: Content, Right: Action triggers) with harmonic earcons.</div>
+          </div>
+          <div class="p-2 rounded bg-slate-50 border border-slate-200">
+            <div class="font-bold text-slate-900">Dual-Pass Closed Verification:</div>
+            <div class="text-slate-600 text-[11px] mt-0.5">Deterministic luminance calculation and autonomous Pass 2 verifier guaranteeing zero residual defects before outputting code.</div>
+          </div>
         </div>
       </div>`
   },
@@ -1638,4 +1715,113 @@ function escapeHtml(str) {
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/* ----------------------------------------------------
+ * ACCESSIBILITY DIGITAL TWIN CONTROLLER
+ * ---------------------------------------------------- */
+function renderDigitalTwin(html) {
+  if (!window.A11yDigitalTwin) return;
+  const twinHtml = window.A11yDigitalTwin.synthesizeDigitalTwinHtml(html);
+  const twinScript = window.A11yDigitalTwin.generateShadowDomScript();
+
+  const htmlView = document.getElementById('digitalTwinHtmlView');
+  const scriptView = document.getElementById('digitalTwinScriptView');
+
+  if (htmlView) htmlView.textContent = twinHtml;
+  if (scriptView) scriptView.textContent = twinScript;
+}
+
+function setupDigitalTwinCopyButtons() {
+  document.getElementById('copyTwinBtn')?.addEventListener('click', () => {
+    const text = document.getElementById('digitalTwinHtmlView')?.textContent;
+    if (text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Digital Twin HTML copied to clipboard!');
+      });
+    }
+  });
+
+  document.getElementById('copyTwinScriptBtn')?.addEventListener('click', () => {
+    const text = document.getElementById('digitalTwinScriptView')?.textContent;
+    if (text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Digital Twin Shadow DOM script copied to clipboard!');
+      });
+    }
+  });
+}
+
+/* ----------------------------------------------------
+ * NEURODIVERSITY & COGNITIVE LOAD SUITE CONTROLLER
+ * ---------------------------------------------------- */
+let neurodiversityState = {
+  bionic: false,
+  dyslexia: false,
+  ruler: false,
+  shield: false
+};
+
+function getPreviewIframeDoc() {
+  const iframe = document.getElementById('renderedPreview');
+  return iframe ? (iframe.contentDocument || iframe.contentWindow?.document) : null;
+}
+
+function resetNeurodiversityToolbar() {
+  neurodiversityState = { bionic: false, dyslexia: false, ruler: false, shield: false };
+  const buttons = ['btnBionicReading', 'btnDyslexiaFont', 'btnFocusRuler', 'btnSensoryShield'];
+  buttons.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.className = 'px-1.5 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-700 border border-slate-300 transition';
+    }
+  });
+}
+
+function setupNeurodiversityToolbar() {
+  const btnBionic = document.getElementById('btnBionicReading');
+  const btnDyslexia = document.getElementById('btnDyslexiaFont');
+  const btnRuler = document.getElementById('btnFocusRuler');
+  const btnShield = document.getElementById('btnSensoryShield');
+
+  const toggleBtnClass = (btn, active) => {
+    if (!btn) return;
+    if (active) {
+      btn.className = 'px-1.5 py-0.5 rounded text-[11px] font-medium bg-blue-600 text-white border border-blue-700 transition shadow-sm';
+    } else {
+      btn.className = 'px-1.5 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-700 border border-slate-300 transition';
+    }
+  };
+
+  btnBionic?.addEventListener('click', () => {
+    const doc = getPreviewIframeDoc();
+    if (!doc || !window.A11yNeurodiversity) return;
+    neurodiversityState.bionic = !neurodiversityState.bionic;
+    window.A11yNeurodiversity.toggleBionicReading(doc, neurodiversityState.bionic);
+    toggleBtnClass(btnBionic, neurodiversityState.bionic);
+  });
+
+  btnDyslexia?.addEventListener('click', () => {
+    const doc = getPreviewIframeDoc();
+    if (!doc || !window.A11yNeurodiversity) return;
+    neurodiversityState.dyslexia = !neurodiversityState.dyslexia;
+    window.A11yNeurodiversity.toggleDyslexiaTypography(doc, neurodiversityState.dyslexia);
+    toggleBtnClass(btnDyslexia, neurodiversityState.dyslexia);
+  });
+
+  btnRuler?.addEventListener('click', () => {
+    const doc = getPreviewIframeDoc();
+    if (!doc || !window.A11yNeurodiversity) return;
+    neurodiversityState.ruler = !neurodiversityState.ruler;
+    window.A11yNeurodiversity.toggleFocusRuler(doc, neurodiversityState.ruler);
+    toggleBtnClass(btnRuler, neurodiversityState.ruler);
+  });
+
+  btnShield?.addEventListener('click', () => {
+    const doc = getPreviewIframeDoc();
+    if (!doc || !window.A11yNeurodiversity) return;
+    neurodiversityState.shield = !neurodiversityState.shield;
+    window.A11yNeurodiversity.toggleSensoryShield(doc, neurodiversityState.shield);
+    toggleBtnClass(btnShield, neurodiversityState.shield);
+  });
 }

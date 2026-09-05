@@ -6,6 +6,9 @@ const { detectViolations } = require('./engine/detector.js');
 const { remediateHtml } = require('./engine/remediator.js');
 const { verifyRemediation } = require('./engine/verifier.js');
 const { computeLineDiff } = require('./engine/diff.js');
+const A11yNeurodiversity = require('./engine/neurodiversity.js');
+const A11yDigitalTwin = require('./engine/digital_twin.js');
+const { generateScriptWithRegex, calculateSpatialPan } = require('./engine/screenreader.js');
 
 console.log('--- RUNNING TEST SUITE ---');
 
@@ -233,6 +236,81 @@ console.log('--- RUNNING TEST SUITE ---');
   console.log('[PASS] Test Case 9 (Line Diff CRLF Normalization & Safety Bounds): PASS');
 }
 
+// Test Case 10: Neurodiversity Suite (Bionic Reading & Cognitive Load Styles)
+{
+  const bionicWord = A11yNeurodiversity.applyBionicReading('Accessibility');
+  assert.strictEqual(bionicWord, '<b>Access</b>ibility', 'Word fixation must bold the initial fixation anchor');
+
+  const bionicHtml = A11yNeurodiversity.transformHtmlForBionicReading('<p>Clean code architecture</p>');
+  assert(bionicHtml.includes('<b>Cle</b>an') && bionicHtml.includes('<b>co</b>de'), 'Bionic Reading must bold text content inside HTML tags');
+
+  assert(A11yNeurodiversity.DYSLEXIA_STYLES.includes('OpenDyslexic'), 'Dyslexia styles must define high-legibility typography');
+  assert(A11yNeurodiversity.SENSORY_SHIELD_STYLES.includes('animation-duration: 0.001ms'), 'Sensory shield must suppress motion and animations');
+  console.log('[PASS] Test Case 10 (Neurodiversity Suite - Bionic Reading & Cognitive Styles): PASS');
+}
+
+// Test Case 11: Accessibility Digital Twin (Semantic Assistive Tree & Shadow Layer)
+{
+  const inputHtml = `
+    <header><nav><a href="#about">About</a><a href="#contact">Contact</a></nav></header>
+    <main>
+      <h2>Services</h2>
+      <button id="cta-btn">Get Started</button>
+      <input type="text" id="user-email" aria-label="Email Address">
+    </main>
+    <footer><p>Copyright 2026</p></footer>
+  `;
+
+  const extracted = A11yDigitalTwin.extractLandmarksAndControls(inputHtml);
+  assert(extracted.landmarks.some(l => l.type === 'header'), 'Must extract header landmark');
+  assert(extracted.landmarks.some(l => l.type === 'nav'), 'Must extract nav landmark');
+  assert(extracted.headings.some(h => h.text === 'Services'), 'Must extract heading');
+  assert(extracted.controls.some(c => c.type === 'button' && c.id === 'cta-btn'), 'Must extract CTA button');
+  assert(extracted.controls.some(c => c.type === 'input' && c.id === 'user-email'), 'Must extract input field');
+
+  const twinHtml = A11yDigitalTwin.synthesizeDigitalTwinHtml(inputHtml);
+  assert(twinHtml.includes('id="a11y-digital-twin-container"'), 'Twin HTML must have root container');
+  assert(twinHtml.includes('role="banner"'), 'Twin HTML must contain banner landmark');
+  assert(twinHtml.includes('role="navigation"'), 'Twin HTML must contain navigation landmark');
+  assert(twinHtml.includes('role="main"'), 'Twin HTML must contain main landmark');
+  assert(twinHtml.includes('role="contentinfo"'), 'Twin HTML must contain contentinfo landmark');
+  assert(twinHtml.includes('class="twin-skip-link"'), 'Twin HTML must contain skip navigation link');
+
+  const shadowScript = A11yDigitalTwin.generateShadowDomScript();
+  assert(shadowScript.includes('attachShadow'), 'Shadow DOM script must attach isolated shadow root');
+  assert(shadowScript.includes('data-sync-id'), 'Shadow DOM script must bind bidirectional focus sync');
+  console.log('[PASS] Test Case 11 (Accessibility Digital Twin - SAT & Shadow DOM Synthesis): PASS');
+}
+
+// Test Case 12: 3D Spatial Binaural Soundscape Panning
+{
+  const testHtml = `
+    <nav><a href="/products">Products</a></nav>
+    <main>
+      <h1>Catalog</h1>
+      <button id="buy-btn">Purchase Now</button>
+    </main>
+  `;
+
+  const scriptData = generateScriptWithRegex(testHtml);
+  assert(scriptData.utterances.length >= 2, 'Must generate utterances');
+
+  const headingUtterance = scriptData.utterances.find(u => u.type === 'heading');
+  assert(headingUtterance, 'Must generate heading utterance');
+  assert.strictEqual(headingUtterance.pan, 0.0, 'Heading acoustic pan must be center (0.0)');
+  assert.strictEqual(headingUtterance.category, 'content', 'Heading category must be content');
+
+  const buttonUtterance = scriptData.utterances.find(u => u.type === 'button');
+  assert(buttonUtterance, 'Must generate button utterance');
+  assert.strictEqual(buttonUtterance.pan, 0.75, 'Button acoustic pan must be right channel (+0.75)');
+  assert.strictEqual(buttonUtterance.category, 'action', 'Button category must be action');
+
+  assert.strictEqual(calculateSpatialPan('navigation'), -0.75, 'Navigation pan must be left channel (-0.75)');
+  assert.strictEqual(calculateSpatialPan('button'), 0.75, 'Button pan must be right channel (+0.75)');
+  assert.strictEqual(calculateSpatialPan('heading'), 0.0, 'Heading pan must be center (0.0)');
+  console.log('[PASS] Test Case 12 (3D Spatial Binaural Soundscape Panning): PASS');
+}
+
 console.log('---------------------------------');
-console.log('ALL 9 TEST CASES PASSED SUCCESSFULLY!');
+console.log('ALL 12 TEST CASES PASSED SUCCESSFULLY!');
 
