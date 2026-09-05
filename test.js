@@ -191,6 +191,48 @@ console.log('--- RUNNING TEST SUITE ---');
   console.log('[PASS] Test Case 7 (Universal Runtime Self-Healing & Base Href Preservation): PASS');
 }
 
+// Test Case 8: Prevailing Real-World Code & Label Duplication Prevention
+{
+  const prevailingHtml = `
+    <div class="login-container">
+      <h5 class="login-title">Welcome Back</h5>
+      <form method="post">
+        <label for="Username">Username</label>
+        <input id="Username" name="Username" type="text">
+        <input type="hidden" name="__RequestVerificationToken" value="token123">
+        <button type="submit">Sign In</button>
+      </form>
+    </div>
+  `;
+
+  const violations = detectViolations(prevailingHtml);
+  // Only heading-order should be flagged (h5 skipped), NOT label or button
+  assert(violations.some(v => v.ruleId === 'heading-order'), 'Must flag skipped h5 heading');
+  assert(!violations.some(v => v.ruleId === 'label'), 'Must NOT flag input with existing valid label');
+
+  const res = remediateHtml(prevailingHtml);
+  // Ensure heading is adjusted to h1
+  assert(res.remediatedHtml.includes('<h1 class="login-title">Welcome Back</h1>'), 'h5 must be promoted to h1');
+  // Ensure NO duplicate label is created
+  const labelMatches = res.remediatedHtml.match(/<label[^>]*for="Username"/g);
+  assert.strictEqual(labelMatches ? labelMatches.length : 0, 1, 'Username label must NOT be duplicated');
+  assert(res.remediatedHtml.includes('value="token123"'), 'Hidden verification tokens must be preserved');
+  console.log('[PASS] Test Case 8 (Prevailing Real-World Code & Label Duplication Prevention): PASS');
+}
+
+// Test Case 9: Line Diff CRLF Normalization & Safety Bounds
+{
+  const crlfOriginal = "<h1>Title</h1>\r\n<p>Line 1</p>\r\n<p>Line 2</p>";
+  const crlfModified = "<h1>Title</h1>\r\n<p>Line 1 Updated</p>\r\n<p>Line 2</p>";
+  const diffs = computeLineDiff(crlfOriginal, crlfModified);
+
+  assert(diffs.length > 0, 'Diffs must be generated for CRLF input');
+  assert(!diffs.some(d => d.content && d.content.includes('\r')), 'Carriage returns must be stripped from diff content');
+  assert(diffs.some(d => d.type === 'removed' && d.content.includes('Line 1')), 'Must show removed line');
+  assert(diffs.some(d => d.type === 'added' && d.content.includes('Line 1 Updated')), 'Must show added line');
+  console.log('[PASS] Test Case 9 (Line Diff CRLF Normalization & Safety Bounds): PASS');
+}
+
 console.log('---------------------------------');
-console.log('ALL 7 TEST CASES PASSED SUCCESSFULLY!');
+console.log('ALL 9 TEST CASES PASSED SUCCESSFULLY!');
 

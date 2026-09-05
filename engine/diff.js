@@ -1,4 +1,4 @@
-﻿/**
+/**
  * A11y Remediation Engine — Diff Generator
  * Produces clean, professional enterprise visual line diffs (GitHub/GitLab style).
  */
@@ -15,14 +15,19 @@
   }
 
   function computeLineDiff(originalCode, modifiedCode) {
-    const origLines = originalCode.trim().split('\n');
-    const modLines = modifiedCode.trim().split('\n');
+    const origLines = (originalCode || '').replace(/\r\n/g, '\n').trim().split('\n');
+    const modLines = (modifiedCode || '').replace(/\r\n/g, '\n').trim().split('\n');
     const diffLines = [];
 
     let i = 0, j = 0;
-    while (i < origLines.length || j < modLines.length) {
+    const maxIterations = (origLines.length + modLines.length) * 3;
+    let iterations = 0;
+
+    while ((i < origLines.length || j < modLines.length) && iterations++ < maxIterations) {
       const o = origLines[i];
       const m = modLines[j];
+      const prevI = i;
+      const prevJ = j;
 
       if (o === m) {
         diffLines.push({
@@ -34,7 +39,7 @@
         i++;
         j++;
       } else {
-        if (o !== undefined && (m === undefined || !modLines.slice(j).includes(o))) {
+        if (o !== undefined && (m === undefined || !modLines.slice(j, j + 50).includes(o))) {
           diffLines.push({
             type: 'removed',
             origLineNo: i + 1,
@@ -43,7 +48,7 @@
           });
           i++;
         }
-        if (m !== undefined && (o === undefined || !origLines.slice(i).includes(m))) {
+        if (m !== undefined && (o === undefined || !origLines.slice(i, i + 50).includes(m))) {
           diffLines.push({
             type: 'added',
             origLineNo: null,
@@ -52,7 +57,7 @@
           });
           j++;
         }
-        if (o !== undefined && m !== undefined && o !== m && origLines.slice(i).includes(m) && modLines.slice(j).includes(o)) {
+        if (o !== undefined && m !== undefined && o !== m && origLines.slice(i, i + 50).includes(m) && modLines.slice(j, j + 50).includes(o)) {
           diffLines.push({
             type: 'removed',
             origLineNo: i + 1,
@@ -67,6 +72,28 @@
           });
           i++;
           j++;
+        }
+
+        // Safety fallback if no branch advanced indices
+        if (i === prevI && j === prevJ) {
+          if (i < origLines.length) {
+            diffLines.push({
+              type: 'removed',
+              origLineNo: i + 1,
+              modLineNo: null,
+              content: origLines[i]
+            });
+            i++;
+          }
+          if (j < modLines.length) {
+            diffLines.push({
+              type: 'added',
+              origLineNo: null,
+              modLineNo: j + 1,
+              content: modLines[j]
+            });
+            j++;
+          }
         }
       }
     }

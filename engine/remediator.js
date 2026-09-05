@@ -1,4 +1,4 @@
-﻿/**
+/**
  * A11y Remediation Engine — Universal Remediator
  * Wrapped in UMD/IIFE to prevent global variable collisions in browser.
  */
@@ -223,12 +223,25 @@
       if (tagLower === 'input' && ['hidden', 'submit', 'button', 'reset'].includes(type)) return match;
 
       const idMatch = /id\s*=\s*(["'])(.*?)\1/i.exec(match);
-      const hasAria = /aria-label|aria-labelledby/i.test(match);
+      const hasAria = /aria-label|aria-labelledby|title/i.test(match);
 
       let id = idMatch ? idMatch[2] : null;
-      let labelText = inferLabel(match, lastHeadingText);
 
+      // Skip if already accessible via ARIA or title
       if (hasAria) return match;
+
+      // Skip if already linked to an explicit <label for="id"> in the document
+      if (id && new RegExp('<label[^>]*for=["\']' + id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '["\']', 'i').test(html)) {
+        return match;
+      }
+
+      // Skip if wrapped inside a <label> container
+      const escapedMatch = match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (new RegExp('<label[^>]*>[\\s\\S]*?' + escapedMatch, 'i').test(html)) {
+        return match;
+      }
+
+      let labelText = inferLabel(match, lastHeadingText);
 
       if (!id) {
         if (type === 'email') id = 'email';

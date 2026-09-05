@@ -1,11 +1,13 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
+
+// Allow dev/staging self-signed SSL certificates for target URLs in proxy
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const { remediateHtml } = require('./engine/remediator.js');
 
-const PORTS = [3001, 3002, 5000, 8080, 8000];
+const PORTS = [3000, 3001, 3002, 5000, 8080, 8000];
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -15,6 +17,15 @@ const MIME_TYPES = {
   '.jpg': 'image/jpeg',
   '.svg': 'image/svg+xml'
 };
+
+function normalizeTargetUrl(raw) {
+  if (!raw) return '';
+  let clean = raw.trim();
+  if (!/^https?:\/\//i.test(clean)) {
+    clean = 'https://' + clean;
+  }
+  return clean;
+}
 
 const server = http.createServer(async (req, res) => {
   // CORS Headers
@@ -28,27 +39,29 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  const parsedUrl = url.parse(req.url, true);
-  let reqPath = parsedUrl.pathname;
+  const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  let reqPath = reqUrl.pathname;
 
   // 1. Live Website URL Fetch Proxy Endpoint (Full-Document Preservation with <base href>)
   if (reqPath === '/api/fetch-url') {
-    const targetUrl = parsedUrl.query.url;
+    const rawTarget = reqUrl.searchParams.get('url');
+    const targetUrl = normalizeTargetUrl(rawTarget);
     if (!targetUrl) {
       res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, error: 'Missing url query parameter' }));
+      res.end(JSON.stringify({ success: false, error: 'Missing or invalid url query parameter' }));
       return;
     }
 
     try {
       console.log(`[Proxy] Fetching target URL: ${targetUrl}`);
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 12000);
+      const timeout = setTimeout(() => controller.abort(), 35000);
 
       const response = await fetch(targetUrl, {
         signal: controller.signal,
+        redirect: 'follow',
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         }
       });
@@ -58,11 +71,12 @@ const server = http.createServer(async (req, res) => {
         throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
       }
 
+      const finalUrl = response.url || targetUrl;
       let rawHtml = await response.text();
 
       // Ensure <base href="..."> is present in <head> so images and stylesheets resolve
       let fullHtml = rawHtml;
-      const baseTag = `<base href="${targetUrl}">`;
+      const baseTag = `<base href="${finalUrl}">`;
       if (/<head\b[^>]*>/i.test(fullHtml)) {
         fullHtml = fullHtml.replace(/<head\b[^>]*>/i, `$& \n  ${baseTag}`);
       } else {
@@ -73,6 +87,7 @@ const server = http.createServer(async (req, res) => {
       res.end(JSON.stringify({
         success: true,
         targetUrl,
+        finalUrl,
         html: fullHtml,
         length: fullHtml.length
       }));
@@ -81,7 +96,7 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         success: false,
-        error: err.name === 'AbortError' ? 'Request timed out after 12 seconds' : err.message
+        error: err.name === 'AbortError' ? 'Target server response timed out after 35 seconds' : err.message
       }));
     }
     return;
@@ -89,22 +104,24 @@ const server = http.createServer(async (req, res) => {
 
   // 2. Live Healed Website Reverse Proxy: Serves the real website with in-memory AST healing & runtime injection
   if (reqPath === '/api/live-heal') {
-    const targetUrl = parsedUrl.query.url;
+    const rawTarget = reqUrl.searchParams.get('url');
+    const targetUrl = normalizeTargetUrl(rawTarget);
     if (!targetUrl) {
       res.writeHead(400, { 'Content-Type': 'text/plain' });
-      res.end('Missing url query parameter');
+      res.end('Missing or invalid url query parameter');
       return;
     }
 
     try {
       console.log(`[LiveHeal] Reverse proxying & healing: ${targetUrl}`);
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 12000);
+      const timeout = setTimeout(() => controller.abort(), 35000);
 
       const response = await fetch(targetUrl, {
         signal: controller.signal,
+        redirect: 'follow',
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         }
       });
@@ -114,14 +131,15 @@ const server = http.createServer(async (req, res) => {
         throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
       }
 
+      const finalUrl = response.url || targetUrl;
       let rawHtml = await response.text();
 
       // 1. AST Remediation
       const remediated = remediateHtml(rawHtml);
       let healedHtml = remediated.remediatedHtml;
 
-      // 2. Inject <base href> so stylesheets, fonts, and assets resolve
-      const baseTag = `<base href="${targetUrl}">`;
+      // 2. Inject <base href> and runtime-heal script
+      const baseTag = `<base href="${finalUrl}">`;
       const runtimeTag = `<script src="/engine/runtime-heal.js" async></script>`;
 
       if (/<head\b[^>]*>/i.test(healedHtml)) {

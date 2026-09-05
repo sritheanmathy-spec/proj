@@ -1,11 +1,11 @@
-﻿{
+{
   "name": "a11y-remediation-engine",
   "version": "1.0.0",
   "description": "Automated Accessibility Remediation Prototype: Detect -> Fix -> Verify",
   "main": "engine/detector.js",
   "scripts": {
     "test": "node test.js",
-    "start": "npx serve . -l 3000"
+    "start": "node server.js"
   },
   "keywords": [
     "accessibility",

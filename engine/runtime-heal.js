@@ -124,7 +124,12 @@
     const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
     headings.forEach(h => {
       const currentLevel = parseInt(h.tagName.substring(1), 10);
-      if (lastLevel > 0 && currentLevel > lastLevel + 1) {
+      if (lastLevel === 0 && currentLevel > 1) {
+        h.setAttribute('aria-level', 1);
+        h.setAttribute('data-a11y-healed', 'heading-level-adjusted-to-1');
+        stats.headingsHealed++;
+        lastLevel = 1;
+      } else if (lastLevel > 0 && currentLevel > lastLevel + 1) {
         // Skipped heading hierarchy detected
         const correctedLevel = lastLevel + 1;
         h.setAttribute('aria-level', correctedLevel);
