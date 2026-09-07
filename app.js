@@ -30,7 +30,7 @@ const PRESETS = {
 <input type="text">`
   },
   contrast: {
-    name: "Contrast & Form Controls",
+    name: "Color Contrast",
     description: "Low contrast text (#888 on #fff), unlabelled email input, and empty button.",
     html: `<header>
   <h2>Account Setup</h2>
@@ -42,8 +42,21 @@ const PRESETS = {
   <button></button>
 </section>`
   },
+  buttons: {
+    name: "Buttons & ARIA",
+    description: "Icon buttons missing accessible names, empty links, and images missing alt text.",
+    html: `<nav>
+  <a href="/home"><i class="icon-home"></i></a>
+  <button class="nav-toggle"><svg></svg></button>
+  <button class="search-btn"><span class="icon-search"></span></button>
+</nav>
+<main>
+  <img src="banner.png">
+  <button></button>
+</main>`
+  },
   complex: {
-    name: "Complex Real-World Store",
+    name: "Store Checkout",
     description: "Arbitrary checkout form: skipped headings, select dropdown, textarea, icon buttons, empty links.",
     html: `<main>
   <h3>MegaStore Checkout</h3>
@@ -66,6 +79,7 @@ let selectedViolationIndex = 0;
 let currentFramework = 'runtime'; // 'runtime', 'table', 'cf', 'react', 'patch'
 let currentScannedUrl = null;
 let tabAnimationTimer = null;
+let editorDebounceTimer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   setupPresetButtons();
@@ -93,7 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupDueDiligenceModal();
   setupPackagerModal();
   setupPortfolioModal();
-  loadPreset('script');
+  loadPreset('script', true);
+  switchMainTab('sandbox');
 });
 
 /* ----------------------------------------------------
@@ -120,13 +135,13 @@ function setupPresetButtons() {
       btn.className = 'preset-btn px-2.5 py-1 text-xs font-medium rounded border transition bg-blue-50 border-blue-300 text-blue-700 font-semibold shadow-sm';
       currentScannedUrl = null;
       hideLiveHealButton();
-      loadPreset(key);
+      loadPreset(key, true);
     };
     container.appendChild(btn);
   });
 }
 
-function loadPreset(key) {
+function loadPreset(key, autoRun = true) {
   const preset = PRESETS[key];
   if (!preset) return;
   const editor = document.getElementById('htmlEditor');
@@ -139,6 +154,9 @@ function loadPreset(key) {
   if (descEl) descEl.textContent = preset.description;
 
   resetPipelineUI();
+  if (autoRun) {
+    runPipeline(false);
+  }
 }
 
 function setupEditorListener() {
@@ -146,6 +164,12 @@ function setupEditorListener() {
   if (editor) {
     editor.addEventListener('input', (e) => {
       updateCharCount(e.target.value.length);
+      if (editorDebounceTimer) clearTimeout(editorDebounceTimer);
+      editorDebounceTimer = setTimeout(() => {
+        if (editor.value.trim().length > 0) {
+          runPipeline(false);
+        }
+      }, 700);
     });
   }
 }
@@ -287,6 +311,12 @@ function switchMainTab(activeTab) {
     activeBtn.classList.remove('text-slate-600', 'border-transparent', 'font-medium');
   }
   document.getElementById(`view-${activeTab}`)?.classList.remove('hidden');
+
+  if (activeTab === 'sandbox' && currentRemediation) {
+    updateRenderedPreview(currentRemediation.remediatedHtml);
+    const orig = document.getElementById('htmlEditor')?.value || '';
+    updateXrayFrames(orig, currentRemediation.remediatedHtml);
+  }
 }
 
 function setPipelineStep(step) {
@@ -634,8 +664,6 @@ function setupFrameworkDeploy() {
       setTimeout(() => { btn.innerHTML = orig; }, 1500);
     });
   });
-
-  document.getElementById('downloadBundleBtn')?.addEventListener('click', downloadRemediatedBundle);
 }
 
 window.switchFrameworkView = function(fw) {
@@ -825,6 +853,7 @@ function setupKeyboardTabSimulator() {
 }
 
 function runTabOrderSimulation() {
+  switchMainTab('sandbox');
   const iframe = document.getElementById('renderedPreview');
   const ticker = document.getElementById('focusSequenceTicker');
   if (!iframe || !iframe.contentDocument) return;
@@ -1057,6 +1086,7 @@ function setupVisionSimulator() {
   if (!select || !window.A11yVision) return;
 
   select.addEventListener('change', (e) => {
+    switchMainTab('sandbox');
     const iframe = document.getElementById('renderedPreview');
     window.A11yVision.applyVisionFilter(e.target.value, iframe);
 
@@ -1821,6 +1851,7 @@ function setupNeurodiversityToolbar() {
   };
 
   btnBionic?.addEventListener('click', () => {
+    switchMainTab('sandbox');
     const doc = getPreviewIframeDoc();
     if (!doc || !window.A11yNeurodiversity) return;
     neurodiversityState.bionic = !neurodiversityState.bionic;
@@ -1829,6 +1860,7 @@ function setupNeurodiversityToolbar() {
   });
 
   btnDyslexia?.addEventListener('click', () => {
+    switchMainTab('sandbox');
     const doc = getPreviewIframeDoc();
     if (!doc || !window.A11yNeurodiversity) return;
     neurodiversityState.dyslexia = !neurodiversityState.dyslexia;
@@ -1837,6 +1869,7 @@ function setupNeurodiversityToolbar() {
   });
 
   btnRuler?.addEventListener('click', () => {
+    switchMainTab('sandbox');
     const doc = getPreviewIframeDoc();
     if (!doc || !window.A11yNeurodiversity) return;
     neurodiversityState.ruler = !neurodiversityState.ruler;
@@ -1845,6 +1878,7 @@ function setupNeurodiversityToolbar() {
   });
 
   btnShield?.addEventListener('click', () => {
+    switchMainTab('sandbox');
     const doc = getPreviewIframeDoc();
     if (!doc || !window.A11yNeurodiversity) return;
     neurodiversityState.shield = !neurodiversityState.shield;
@@ -1870,6 +1904,7 @@ function setupXraySlider() {
   if (!btn || !single || !xray || !divider || !afterPane) return;
 
   btn.addEventListener('click', () => {
+    switchMainTab('sandbox');
     isXrayActive = !isXrayActive;
     if (isXrayActive) {
       single.classList.add('hidden');
@@ -1932,6 +1967,7 @@ function setupHudRadar() {
   if (!btn) return;
 
   btn.addEventListener('click', () => {
+    switchMainTab('sandbox');
     isHudActive = !isHudActive;
     const iframe = document.getElementById('renderedPreview');
     const doc = iframe?.contentDocument || iframe?.contentWindow?.document;
@@ -1959,6 +1995,7 @@ function setupSwitchAccess() {
   if (!btn) return;
 
   btn.addEventListener('click', () => {
+    switchMainTab('sandbox');
     isSwitchActive = !isSwitchActive;
     const iframe = document.getElementById('renderedPreview');
     const doc = iframe?.contentDocument || iframe?.contentWindow?.document;

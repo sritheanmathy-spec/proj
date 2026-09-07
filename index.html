@@ -493,11 +493,11 @@
         <!-- Tab Navigation Bar -->
         <div class="flex items-center justify-between px-2 bg-slate-100/80 border-b border-slate-200 overflow-x-auto">
           <div class="flex items-center">
-            <button id="tab-deploy" type="button" class="active-tab px-3 py-2 text-xs font-semibold border-b-2 border-blue-600 text-blue-700 bg-white transition flex-shrink-0">
-              Deploy & Fix
-            </button>
-            <button id="tab-sandbox" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition flex-shrink-0">
+            <button id="tab-sandbox" type="button" class="active-tab px-3 py-2 text-xs font-semibold border-b-2 border-blue-600 text-blue-700 bg-white transition flex-shrink-0">
               Live Staging & Focus
+            </button>
+            <button id="tab-deploy" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition flex-shrink-0">
+              Deploy & Fix
             </button>
             <button id="tab-diff" type="button" class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition flex-shrink-0">
               Line Diff
@@ -515,7 +515,7 @@
         </div>
 
         <!-- TAB 1: Deploy & Multi-Framework Edge Exporter -->
-        <div id="view-deploy" class="p-3.5 flex-1 flex flex-col gap-3 overflow-y-auto max-h-[360px]">
+        <div id="view-deploy" class="hidden p-3.5 flex-1 flex flex-col gap-3 overflow-y-auto max-h-[360px]">
           <!-- Framework Sub-Selector -->
           <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-2">
             <div class="flex items-center gap-1.5 flex-wrap">
@@ -550,7 +550,7 @@
         </div>
 
         <!-- TAB 2: Live Staging Sandbox & Focus Traversal Visualizer -->
-        <div id="view-sandbox" class="hidden p-3 flex-1 flex flex-col gap-2 overflow-hidden h-[360px]">
+        <div id="view-sandbox" class="p-3 flex-1 flex flex-col gap-2 overflow-hidden h-[360px]">
           <div class="flex items-center justify-between bg-slate-50 px-2.5 py-1.5 rounded border border-slate-200 text-xs flex-wrap gap-2">
             <div class="flex items-center gap-1.5 flex-wrap">
               <button id="simulateTabOrderBtn" type="button" class="px-2 py-1 bg-white hover:bg-slate-50 text-blue-700 border border-blue-300 rounded text-xs font-semibold flex items-center gap-1 shadow-sm transition">
