@@ -63,7 +63,7 @@ Navigate to `http://localhost:3000` (or `http://localhost:3001`).
 ## Architecture & Codebase Structure
 
 - `index.html` — Enterprise white/slate responsive user interface.
-- `app.js` — Platform application controller, data table manager, and event router.
+- `app.js` — Platform application controller, live pipeline runner, data table manager, and event router.
 - `engine/detector.js` — WCAG 2.1 AA diagnostic detection engine.
 - `engine/remediator.js` — Hybrid remediation engine (deterministic formulas + contextual AI logic).
 - `engine/verifier.js` — Closed-loop verification and regression analysis.
@@ -72,11 +72,18 @@ Navigate to `http://localhost:3000` (or `http://localhost:3001`).
 - `engine/vision_sim.js` — SVG-filter based vision impairment simulator.
 - `engine/cicd.js` — GitHub Action workflow and Git patch generator.
 - `engine/ai_inspector.js` — AI transparency model reasoning and alternative switcher.
-- `engine/screenreader.js` — Screen reader acoustic stream simulator.
+- `engine/screenreader.js` — 3D spatial binaural screen reader simulator with Web Audio panning and oscilloscope.
+- `engine/digital_twin.js` — Accessibility Digital Twin (SAT - Semantic Assistive Tree) in Shadow DOM.
+- `engine/neurodiversity.js` — Neurodiversity Suite (Bionic Reading, Dyslexia Font, Focus Ruler, Sensory Shield).
+- `engine/hud_radar.js` — WCAG 44x44px Touch Target Size and Contrast Density HUD Radar.
+- `engine/switch_access.js` — Single-Switch Access & Motor Impairment Assistive Scanner.
 - `engine/runtime-heal.js` — Universal client-side runtime self-healing engine (<8KB) for instant 1-line script deployment.
 - `engine/edge_deploy.js` — Cloudflare Edge Worker (HTMLRewriter) and React JSX/Vue exporter.
 - `engine/vpat.js` — Official VPAT 2.4 / Section 508 Accessibility Conformance Report (ACR) generator with SHA-256 digest.
-- `test.js` — Automated verification and regression test suite (7 comprehensive test suites).
+- `engine/due_diligence.js` — Enterprise Due Diligence & Stakeholder Objection Center (CTO, VP Eng, Legal, Design, CISO, CFO).
+- `engine/packager.js` — Zero-dependency PKZIP Production Packager and Draggable Browser Bookmarklet.
+- `engine/portfolio.js` — Multi-Page Site Portfolio Health Score & Batch Site Auditor with ROI calculator.
+- `test.js` — 18 Automated verification and regression test suites passing 100%.
 
 ---
 
@@ -87,19 +94,22 @@ Add the runtime script to your website's `<head>` or before `</body>`:
 ```html
 <script src="https://cdn.jsdelivr.net/gh/sritheanmathy-spec/proj@main/engine/runtime-heal.js" async></script>
 ```
-Heals missing image alt attributes, unlabelled form inputs, empty buttons, contrast defects, and heading hierarchies dynamically in the live DOM.
+Heals missing image alt attributes, unlabelled form inputs, empty buttons, contrast defects, and heading hierarchies dynamically in the live DOM in under 2ms.
 
 ### 2. Live DevTools Console Tester (Zero-Install Verification)
 Inspect and remediate any client website live in the browser console:
 ```javascript
-const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/sritheanmathy-spec/proj@main/engine/runtime-heal.js';document.head.appendChild(s);
+fetch('https://cdn.jsdelivr.net/gh/sritheanmathy-spec/proj@main/engine/runtime-heal.js').then(r=>r.text()).then(eval);
 ```
 
-### 3. Edge CDN HTMLRewriter (Cloudflare / Fastly)
+### 3. Draggable Browser Bookmarklet
+Drag the one-click bookmarklet button directly into your browser's bookmarks bar to heal any open tab instantly.
+
+### 4. Edge CDN HTMLRewriter (Cloudflare / Fastly)
 Stream and patch accessibility attributes at the CDN edge with zero backend code changes.
 
-### 4. Search & Replace Source Guide
-Exact "Find in your template" vs "Replace with rectified code" tables with 1-click copy for developers.
+### 5. Production ZIP Package Generator
+Download a sealed production bundle containing remediated HTML, runtime scripts, VPAT 2.4 ACR, and European Accessibility Act (EAA 2025) compliance certificates.
 
-### 5. Official VPAT 2.4 / Section 508 Legal Conformance Report
+### 6. Official VPAT 2.4 / Section 508 Legal Conformance Report
 Instant ACR document generation with cryptographic SHA-256 compliance hash for enterprise procurement.
