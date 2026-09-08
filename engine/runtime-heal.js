@@ -74,6 +74,10 @@
   }
 
   function healLiveDOM(options = {}) {
+    if (typeof document !== 'undefined' && document.getElementById('htmlEditor')) {
+      return { imagesHealed: 0, inputsHealed: 0, buttonsHealed: 0, contrastHealed: 0, headingsHealed: 0, totalHealed: 0 };
+    }
+
     const stats = {
       imagesHealed: 0,
       inputsHealed: 0,
